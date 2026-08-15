@@ -35,15 +35,17 @@
 
     <div class="app-container relative">
         
-        <!-- Header / Logo Area -->
+        <!-- Header / Title Area -->
         <div class="pt-10 pb-6 px-6 flex justify-center items-center bg-white rounded-b-3xl shadow-sm z-10">
-            <img src="canmake-logo.png" alt="Canmake Logo" class="h-14 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/400x120/ffffff/ec4899?text=CANMAKE';">
+             <h1 class="text-3xl font-bold text-orange-500 tracking-wider">每天愛打卡</h1>
         </div>
 
         <div class="flex flex-col items-center mt-8 mb-6 px-6">
             <div id="currentDate" class="text-gray-500 font-semibold text-sm mb-1">載入日期中...</div>
-            <div id="currentTime" class="text-5xl font-bold text-gray-800 tracking-tight">00:00</div>
-            <div id="currentSeconds" class="text-gray-400 font-medium text-lg mt-1">00</div>
+            <div class="flex items-baseline justify-center">
+                <div id="currentTime" class="text-5xl font-bold text-gray-800 tracking-tight">00:00</div>
+                <div id="currentSeconds" class="text-gray-400 font-medium text-2xl ml-1">00</div>
+            </div>
         </div>
 
         <div class="px-6 flex gap-4 mb-8">
