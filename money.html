@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧貸款試算與歷史紀錄計算機</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-500 p-2 rounded-lg text-slate-900 font-bold">
+                    <i class="fa-solid fa-calculator text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">貸款試算 Pro</h1>
+                    <p class="text-xs text-slate-400">智慧計算 · 比較歷史 · 精準規劃</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="toggleHistoryBtn" class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition flex items-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-clock-rotate-left text-brand-500"></i>
+                    <span>查詢歷史 (<span id="historyCount">0</span>)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Input Form & Summary (5 cols on lg) -->
+        <section class="lg:col-span-5 space-y-6">
+            
+            <!-- Input Form Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6 space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-brand-600"></i> 貸款條件設定
+                    </h2>
+                    <button onclick="resetInputs()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> 重置
+                    </button>
+                </div>
+
+                <form id="loanForm" class="space-y-4" onsubmit="event.preventDefault(); calculateLoan();">
+                    <!-- Loan Amount -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">貸款總額 (萬元)</label>
+                        <div class="relative">
+                            <input type="number" id="loanAmount" value="1000" min="1" max="100000" step="10" required 
+                                   class="w-full pl-4 pr-12 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white text-slate-800 font-semibold text-lg outline-none transition">
+                            <span class="absolute right-4 top-3 text-slate-400 text-sm font-medium">萬元</span>
+                        </div>
+                    </div>
+
+                    <!-- Interest Rate & Term Grid -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">年利率 (%)</label>
+                            <div class="relative">
+                                <input type="number" id="interestRate" value="2.15" min="0.1" max="20" step="0.01" required 
+                                       class="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white text-slate-800 font-semibold text-base outline-none transition">
+                                <span class="absolute right-3 top-3 text-slate-400 text-xs">%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">貸款期限 (年)</label>
+                            <div class="relative">
+                                <input type="number" id="loanTerm" value="30" min="1" max="50" step="1" required 
+                                       class="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white text-slate-800 font-semibold text-base outline-none transition">
+                                <span class="absolute right-3 top-3 text-slate-400 text-xs">年</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Repayment Type -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">還款方式</label>
+                        <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+                            <button type="button" id="btnType1" onclick="setRepaymentType('equalPayment')" 
+                                    class="py-2 text-xs sm:text-sm font-medium rounded-lg transition shadow-sm bg-white text-slate-800 border border-slate-200">
+                                本息平均攤還
+                            </button>
+                            <button type="button" id="btnType2" onclick="setRepaymentType('equalPrincipal')" 
+                                    class="py-2 text-xs sm:text-sm font-medium rounded-lg transition text-slate-500 hover:text-slate-800">
+                                本金平均攤還
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grace Period -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">寬限期 (只付利息)</label>
+                        <select id="gracePeriod" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 text-slate-800 font-medium text-sm outline-none transition">
+                            <option value="0">無寬限期</option>
+                            <option value="12">1 年 (12 個月)</option>
+                            <option value="24">2 年 (24 個月)</option>
+                            <option value="36">3 年 (36 個月)</option>
+                            <option value="60">5 年 (60 個月)</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit & Save Actions -->
+                    <div class="pt-2 grid grid-cols-3 gap-2">
+                        <button type="submit" class="col-span-2 py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-lg shadow-brand-600/30 transition flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-chart-pie"></i> 開始計算
+                        </button>
+                        <button type="button" onclick="saveCurrentCalculation()" class="col-span-1 py-3 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-xl transition flex items-center justify-center gap-1.5 active:scale-95" title="儲存至歷史紀錄">
+                            <i class="fa-solid fa-bookmark text-brand-400"></i> 儲存
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Summary Dashboard Card -->
+            <div id="summaryCard" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
+                    <span>還款概要試算結果</span>
+                    <span id="repaymentTag" class="text-xs px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-800 font-semibold">本息平均攤還</span>
+                </h3>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+                        <p class="text-xs text-slate-500 font-medium">首期月付金</p>
+                        <p class="text-xl font-extrabold text-slate-900 mt-1" id="firstMonthPayment">$0</p>
+                        <p id="paymentNote" class="text-[10px] text-slate-400 mt-0.5">含本金及利息</p>
+                    </div>
+
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+                        <p class="text-xs text-slate-500 font-medium">總支付利息</p>
+                        <p class="text-xl font-extrabold text-amber-600 mt-1" id="totalInterest">$0</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5" id="interestRatioText">利息占比 0%</p>
+                    </div>
+
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+                        <p class="text-xs text-slate-500 font-medium">本金總額</p>
+                        <p class="text-lg font-bold text-slate-800 mt-1" id="totalPrincipal">$0</p>
+                    </div>
+
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+                        <p class="text-xs text-slate-500 font-medium">本息總還款金額</p>
+                        <p class="text-lg font-bold text-slate-800 mt-1" id="totalRepayment">$0</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Right Column: Visual Charts & Schedule Table (7 cols on lg) -->
+        <section class="lg:col-span-7 space-y-6">
+
+            <!-- Visualization Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-brand-600"></i> 還款分析圖表
+                    </h2>
+                    <div class="flex gap-1 bg-slate-100 p-1 rounded-lg text-xs">
+                        <button onclick="switchChartTab('pie')" id="tabBtnPie" class="px-2.5 py-1 rounded-md font-medium transition bg-white text-slate-800 shadow-sm">本利占比</button>
+                        <button onclick="switchChartTab('line')" id="tabBtnLine" class="px-2.5 py-1 rounded-md font-medium transition text-slate-500 hover:text-slate-800">餘額趨勢</button>
+                    </div>
+                </div>
+
+                <!-- Pie Chart Container -->
+                <div id="pieChartContainer" class="relative h-64 flex items-center justify-center">
+                    <canvas id="ratioChart"></canvas>
+                </div>
+
+                <!-- Line Chart Container -->
+                <div id="lineChartContainer" class="relative h-64 hidden">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Amortization Schedule Table Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-brand-600"></i> 還款明細表
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-400">以「年」或「月」檢視:</span>
+                        <select id="scheduleViewMode" onchange="renderScheduleTable()" class="text-xs bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 font-medium text-slate-700 outline-none">
+                            <option value="year">逐年彙總</option>
+                            <option value="month">逐月明細</option>
+                        </select>
+                        <button onclick="exportCSV()" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition flex items-center gap-1 border border-slate-200">
+                            <i class="fa-solid fa-download text-slate-500"></i> CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto max-h-80 custom-scrollbar border border-slate-100 rounded-xl">
+                    <table class="w-full text-left text-xs sm:text-sm border-collapse">
+                        <thead class="bg-slate-50 text-slate-500 sticky top-0 font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="py-2.5 px-3">期數</th>
+                                <th class="py-2.5 px-3">當期月付金</th>
+                                <th class="py-2.5 px-3 text-emerald-700">償還本金</th>
+                                <th class="py-2.5 px-3 text-amber-700">償還利息</th>
+                                <th class="py-2.5 px-3 text-slate-600">剩餘本金</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody" class="divide-y divide-slate-100 font-mono text-slate-700">
+                            <!-- JS Inject Table Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- History Modal / Side Drawer -->
+    <div id="historyDrawer" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity duration-300 opacity-0 pointer-events-none flex justify-end">
+        <div class="w-full max-w-md bg-white h-full shadow-2xl p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-in-out" id="historyDrawerContent">
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-brand-600 text-lg"></i>
+                        <h2 class="font-bold text-slate-800 text-lg">查詢歷史紀錄</h2>
+                    </div>
+                    <button id="closeHistoryBtn" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-500">
+                    <span>所有儲存的貸款試算組合</span>
+                    <button onclick="confirmClearHistory()" class="text-rose-600 hover:text-rose-700 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> 清空全部
+                    </button>
+                </div>
+
+                <!-- History List Container -->
+                <div id="historyList" class="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] custom-scrollbar pr-1">
+                    <!-- History Items Inject Here -->
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 text-center">
+                <p class="text-xs text-slate-400">紀錄儲存於本機記憶體，關閉視窗後將會保存。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs sm:text-sm px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i class="fa-solid fa-circle-check text-brand-400" id="toastIcon"></i>
+        <span id="toastMessage">已儲存至歷史紀錄</span>
+    </div>
+
+    <script>
+        // State variables
+        let currentRepaymentType = 'equalPayment'; // 'equalPayment' or 'equalPrincipal'
+        let currentSchedule = [];
+        let historyRecords = [];
+        let ratioChartInstance = null;
+        let trendChartInstance = null;
+
+        // On Load Init
+        window.onload = function () {
+            calculateLoan();
+            renderHistoryList();
+            setupDrawerEvents();
+        };
+
+        function setRepaymentType(type) {
+            currentRepaymentType = type;
+            const btn1 = document.getElementById('btnType1');
+            const btn2 = document.getElementById('btnType2');
+            
+            if (type === 'equalPayment') {
+                btn1.className = "py-2 text-xs sm:text-sm font-medium rounded-lg transition shadow-sm bg-white text-slate-800 border border-slate-200";
+                btn2.className = "py-2 text-xs sm:text-sm font-medium rounded-lg transition text-slate-500 hover:text-slate-800";
+                document.getElementById('repaymentTag').innerText = "本息平均攤還";
+            } else {
+                btn2.className = "py-2 text-xs sm:text-sm font-medium rounded-lg transition shadow-sm bg-white text-slate-800 border border-slate-200";
+                btn1.className = "py-2 text-xs sm:text-sm font-medium rounded-lg transition text-slate-500 hover:text-slate-800";
+                document.getElementById('repaymentTag').innerText = "本金平均攤還";
+            }
+            calculateLoan();
+        }
+
+        function resetInputs() {
+            document.getElementById('loanAmount').value = 1000;
+            document.getElementById('interestRate').value = 2.15;
+            document.getElementById('loanTerm').value = 30;
+            document.getElementById('gracePeriod').value = 0;
+            setRepaymentType('equalPayment');
+            showToast("已重置試算條件", "info");
+        }
+
+        // Calculation Algorithm
+        function calculateLoan() {
+            const principalWan = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const principal = principalWan * 10000; // Convert to NTD
+            const annualRate = parseFloat(document.getElementById('interestRate').value) || 0;
+            const monthlyRate = (annualRate / 100) / 12;
+            const totalYears = parseInt(document.getElementById('loanTerm').value) || 1;
+            const totalMonths = totalYears * 12;
+            const graceMonths = parseInt(document.getElementById('gracePeriod').value) || 0;
+
+            if (principal <= 0 || annualRate <= 0 || totalMonths <= 0) return;
+
+            let schedule = [];
+            let remainingPrincipal = principal;
+            let totalInterest = 0;
+            let firstMonthPayment = 0;
+
+            const repaymentMonths = totalMonths - graceMonths;
+
+            if (currentRepaymentType === 'equalPayment') {
+                // 本息平均攤還 (Equal Payment)
+                let monthlyPaymentNoGrace = 0;
+                if (repaymentMonths > 0) {
+                    monthlyPaymentNoGrace = (principal * monthlyRate * Math.pow(1 + monthlyRate, repaymentMonths)) / 
+                                            (Math.pow(1 + monthlyRate, repaymentMonths) - 1);
+                }
+
+                for (let m = 1; m <= totalMonths; m++) {
+                    let interestPaid = remainingPrincipal * monthlyRate;
+                    let principalPaid = 0;
+                    let monthlyPayment = 0;
+
+                    if (m <= graceMonths) {
+                        // 寬限期內：只付利息
+                        monthlyPayment = interestPaid;
+                        principalPaid = 0;
+                    } else {
+                        monthlyPayment = monthlyPaymentNoGrace;
+                        principalPaid = monthlyPayment - interestPaid;
+                    }
+
+                    remainingPrincipal -= principalPaid;
+                    if (remainingPrincipal < 0) remainingPrincipal = 0;
+                    totalInterest += interestPaid;
+
+                    if (m === 1) firstMonthPayment = monthlyPayment;
+
+                    schedule.push({
+                        month: m,
+                        year: Math.ceil(m / 12),
+                        monthlyPayment: Math.round(monthlyPayment),
+                        principalPaid: Math.round(principalPaid),
+                        interestPaid: Math.round(interestPaid),
+                        remainingPrincipal: Math.round(remainingPrincipal)
+                    });
+                }
+
+            } else {
+                // 本金平均攤還 (Equal Principal)
+                const fixedPrincipalPaid = repaymentMonths > 0 ? principal / repaymentMonths : 0;
+
+                for (let m = 1; m <= totalMonths; m++) {
+                    let interestPaid = remainingPrincipal * monthlyRate;
+                    let principalPaid = 0;
+                    let monthlyPayment = 0;
+
+                    if (m <= graceMonths) {
+                        monthlyPayment = interestPaid;
+                        principalPaid = 0;
+                    } else {
+                        principalPaid = fixedPrincipalPaid;
+                        monthlyPayment = principalPaid + interestPaid;
+                    }
+
+                    remainingPrincipal -= principalPaid;
+                    if (remainingPrincipal < 0) remainingPrincipal = 0;
+                    totalInterest += interestPaid;
+
+                    if (m === 1) firstMonthPayment = monthlyPayment;
+
+                    schedule.push({
+                        month: m,
+                        year: Math.ceil(m / 12),
+                        monthlyPayment: Math.round(monthlyPayment),
+                        principalPaid: Math.round(principalPaid),
+                        interestPaid: Math.round(interestPaid),
+                        remainingPrincipal: Math.round(remainingPrincipal)
+                    });
+                }
+            }
+
+            currentSchedule = schedule;
+
+            // Render Output
+            const totalRepayment = principal + totalInterest;
+            const interestRatio = ((totalInterest / totalRepayment) * 100).toFixed(1);
+
+            document.getElementById('firstMonthPayment').innerText = '$' + Math.round(firstMonthPayment).toLocaleString();
+            document.getElementById('totalInterest').innerText = '$' + Math.round(totalInterest).toLocaleString();
+            document.getElementById('totalPrincipal').innerText = '$' + Math.round(principal).toLocaleString();
+            document.getElementById('totalRepayment').innerText = '$' + Math.round(totalRepayment).toLocaleString();
+            document.getElementById('interestRatioText').innerText = `利息占比 ${interestRatio}%`;
+
+            if (graceMonths > 0) {
+                document.getElementById('paymentNote').innerText = `寬限期內月付 $${Math.round(principal * monthlyRate).toLocaleString()}`;
+            } else {
+                document.getElementById('paymentNote').innerText = currentRepaymentType === 'equalPayment' ? '每期固定還款金額' : '隨本金遞減';
+            }
+
+            // Update Views
+            updateCharts(principal, totalInterest, schedule);
+            renderScheduleTable();
+        }
+
+        function updateCharts(principal, totalInterest, schedule) {
+            // 1. Ratio Pie Chart
+            const ctxPie = document.getElementById('ratioChart').getContext('2d');
+            if (ratioChartInstance) ratioChartInstance.destroy();
+
+            ratioChartInstance = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['貸款本金', '總支付利息'],
+                    datasets: [{
+                        data: [principal, totalInterest],
+                        backgroundColor: ['#22c55e', '#f59e0b'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: $${context.raw.toLocaleString()} 元`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Trend Line Chart (Yearly Balance)
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            if (trendChartInstance) trendChartInstance.destroy();
+
+            const yearlyData = schedule.filter(s => s.month % 12 === 0 || s.month === schedule.length);
+            const labels = yearlyData.map(s => `第 ${s.year} 年`);
+            const balances = yearlyData.map(s => s.remainingPrincipal);
+
+            trendChartInstance = new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '剩餘本金 (元)',
+                        data: balances,
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => '$' + (value/10000).toFixed(0) + '萬'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function switchChartTab(tab) {
+            const pieContainer = document.getElementById('pieChartContainer');
+            const lineContainer = document.getElementById('lineChartContainer');
+            const btnPie = document.getElementById('tabBtnPie');
+            const btnLine = document.getElementById('tabBtnLine');
+
+            if (tab === 'pie') {
+                pieContainer.classList.remove('hidden');
+                lineContainer.classList.add('hidden');
+                btnPie.className = "px-2.5 py-1 rounded-md font-medium transition bg-white text-slate-800 shadow-sm";
+                btnLine.className = "px-2.5 py-1 rounded-md font-medium transition text-slate-500 hover:text-slate-800";
+            } else {
+                lineContainer.classList.remove('hidden');
+                pieContainer.classList.add('hidden');
+                btnLine.className = "px-2.5 py-1 rounded-md font-medium transition bg-white text-slate-800 shadow-sm";
+                btnPie.className = "px-2.5 py-1 rounded-md font-medium transition text-slate-500 hover:text-slate-800";
+            }
+        }
+
+        function renderScheduleTable() {
+            const mode = document.getElementById('scheduleViewMode').value;
+            const tbody = document.getElementById('scheduleTableBody');
+            tbody.innerHTML = '';
+
+            if (mode === 'month') {
+                currentSchedule.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                    row.innerHTML = `
+                        <td class="py-2 px-3 font-medium text-slate-900">第 ${item.month} 期</td>
+                        <td class="py-2 px-3 font-semibold text-slate-800">$${item.monthlyPayment.toLocaleString()}</td>
+                        <td class="py-2 px-3 text-emerald-600">$${item.principalPaid.toLocaleString()}</td>
+                        <td class="py-2 px-3 text-amber-600">$${item.interestPaid.toLocaleString()}</td>
+                        <td class="py-2 px-3 text-slate-500">$${item.remainingPrincipal.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } else {
+                // Yearly Summary
+                const yearsCount = Math.ceil(currentSchedule.length / 12);
+                for (let y = 1; y <= yearsCount; y++) {
+                    const yearItems = currentSchedule.filter(s => s.year === y);
+                    const yearPaymentSum = yearItems.reduce((acc, cur) => acc + cur.monthlyPayment, 0);
+                    const yearPrincipalSum = yearItems.reduce((acc, cur) => acc + cur.principalPaid, 0);
+                    const yearInterestSum = yearItems.reduce((acc, cur) => acc + cur.interestPaid, 0);
+                    const lastBalance = yearItems[yearItems.length - 1].remainingPrincipal;
+
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-slate-50 transition border-b border-slate-100 font-medium";
+                    row.innerHTML = `
+                        <td class="py-2.5 px-3 font-bold text-brand-800">第 ${y} 年</td>
+                        <td class="py-2.5 px-3 font-bold text-slate-900">$${yearPaymentSum.toLocaleString()}</td>
+                        <td class="py-2.5 px-3 text-emerald-700">$${yearPrincipalSum.toLocaleString()}</td>
+                        <td class="py-2.5 px-3 text-amber-700">$${yearInterestSum.toLocaleString()}</td>
+                        <td class="py-2.5 px-3 text-slate-600">$${lastBalance.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            }
+        }
+
+        function saveCurrentCalculation() {
+            const loanAmount = document.getElementById('loanAmount').value;
+            const interestRate = document.getElementById('interestRate').value;
+            const loanTerm = document.getElementById('loanTerm').value;
+            const gracePeriod = document.getElementById('gracePeriod').value;
+            const firstMonthPayment = document.getElementById('firstMonthPayment').innerText;
+            const totalInterest = document.getElementById('totalInterest').innerText;
+
+            const record = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString(),
+                loanAmount,
+                interestRate,
+                loanTerm,
+                gracePeriod,
+                type: currentRepaymentType,
+                typeText: currentRepaymentType === 'equalPayment' ? '本息平均' : '本金平均',
+                firstMonthPayment,
+                totalInterest
+            };
+
+            historyRecords.unshift(record);
+            renderHistoryList();
+            showToast("已成功新增至查詢紀錄！");
+        }
+
+        function renderHistoryList() {
+            const listContainer = document.getElementById('historyList');
+            document.getElementById('historyCount').innerText = historyRecords.length;
+
+            if (historyRecords.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-10 text-slate-400 space-y-2">
+                        <i class="fa-solid fa-folder-open text-3xl opacity-50"></i>
+                        <p class="text-xs">尚無查詢紀錄</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            historyRecords.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 hover:border-brand-500 transition relative group";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-xs text-slate-400">
+                        <span class="font-medium text-slate-500">${item.date} ${item.timestamp}</span>
+                        <span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-semibold">${item.typeText}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div><span class="text-slate-400">金額:</span> <span class="font-bold text-slate-800">${item.loanAmount} 萬</span></div>
+                        <div><span class="text-slate-400">利率:</span> <span class="font-bold text-slate-800">${item.interestRate}%</span></div>
+                        <div><span class="text-slate-400">期限:</span> <span class="font-bold text-slate-800">${item.loanTerm} 年</span></div>
+                        <div><span class="text-slate-400">寬限:</span> <span class="font-bold text-slate-800">${item.gracePeriod > 0 ? item.gracePeriod+'月' : '無'}</span></div>
+                    </div>
+                    <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                        <div>
+                            <p class="text-[10px] text-slate-400">首期月付</p>
+                            <p class="font-extrabold text-brand-700">${item.firstMonthPayment}</p>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="loadHistoryItem(${item.id})" class="px-2.5 py-1 bg-white hover:bg-brand-50 text-brand-700 border border-brand-300 rounded-lg font-medium transition">
+                                載入
+                            </button>
+                            <button onclick="deleteHistoryItem(${item.id})" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function loadHistoryItem(id) {
+            const item = historyRecords.find(r => r.id === id);
+            if (!item) return;
+
+            document.getElementById('loanAmount').value = item.loanAmount;
+            document.getElementById('interestRate').value = item.interestRate;
+            document.getElementById('loanTerm').value = item.loanTerm;
+            document.getElementById('gracePeriod').value = item.gracePeriod;
+            setRepaymentType(item.type);
+
+            closeHistoryDrawer();
+            showToast("已成功載入歷史試算參數", "info");
+        }
+
+        function deleteHistoryItem(id) {
+            historyRecords = historyRecords.filter(r => r.id !== id);
+            renderHistoryList();
+            showToast("已刪除該筆歷史紀錄", "info");
+        }
+
+        function confirmClearHistory() {
+            if (historyRecords.length === 0) return;
+            historyRecords = [];
+            renderHistoryList();
+            showToast("已清空所有歷史紀錄", "info");
+        }
+
+        function exportCSV() {
+            if (!currentSchedule || currentSchedule.length === 0) return;
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "期數(月),當期月付金,償還本金,償還利息,剩餘本金\n";
+
+            currentSchedule.forEach(row => {
+                csvContent += `${row.month},${row.monthlyPayment},${row.principalPaid},${row.interestPaid},${row.remainingPrincipal}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `貸款還款明細表_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("已開始下載 CSV 明細表");
+        }
+
+        function setupDrawerEvents() {
+            const toggleBtn = document.getElementById('toggleHistoryBtn');
+            const closeBtn = document.getElementById('closeHistoryBtn');
+            const drawer = document.getElementById('historyDrawer');
+            const drawerContent = document.getElementById('historyDrawerContent');
+
+            function openDrawer() {
+                drawer.classList.remove('pointer-events-none', 'opacity-0');
+                drawer.classList.add('opacity-100');
+                drawerContent.classList.remove('translate-x-full');
+            }
+
+            function closeDrawer() {
+                drawer.classList.add('pointer-events-none', 'opacity-0');
+                drawer.classList.remove('opacity-100');
+                drawerContent.classList.add('translate-x-full');
+            }
+
+            toggleBtn.addEventListener('click', openDrawer);
+            closeBtn.addEventListener('click', closeDrawer);
+            drawer.addEventListener('click', (e) => {
+                if (e.target === drawer) closeDrawer();
+            });
+
+            window.closeHistoryDrawer = closeDrawer;
+        }
+
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMessage.innerText = message;
+            if (type === "info") {
+                toastIcon.className = "fa-solid fa-circle-info text-sky-400";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-check text-brand-400";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
