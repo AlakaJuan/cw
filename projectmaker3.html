@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專案啟動與自動排程系統 (Project Kickoff Engine)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        },
+                        lightbg: '#f8fafc',
+                        cardbg: '#ffffff',
+                        bordercolor: '#e2e8f0'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+        }
+        .tech-glow {
+            box-shadow: 0 10px 30px -5px rgba(14, 165, 233, 0.12);
+        }
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0ea5e9;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-12 bg-slate-50 text-slate-900">
+
+    <header class="border-b border-slate-200 bg-white/90 sticky top-0 z-40 backdrop-blur-md shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
+                    <i class="fa-solid fa-network-wired text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-900 tracking-wide flex items-center gap-2">
+                        Project Kickoff Engine <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800 border border-cyan-200">v1.8 Light Pro</span>
+                    </h1>
+                    <p class="text-xs text-slate-500">線上專案自動排程與 Google Sheet 同步系統</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="promptClearDraftModal()" class="text-xs px-3 py-1.5 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 font-medium border border-rose-200 transition duration-150 flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-rotate-left"></i> 重置表單
+                </button>
+                <button onclick="toggleGasModal()" class="text-xs px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-cyan-700 font-medium border border-slate-300 transition duration-150 flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-code"></i> GAS 後端腳本指南
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Left Panel: Input Form (7 cols) -->
+        <section class="lg:col-span-7 space-y-6">
+            
+            <!-- Step Card 1: Basic Info -->
+            <div class="glass-panel rounded-2xl p-6 shadow-sm border border-slate-200 bg-white">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h2 class="text-md font-bold text-cyan-700 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-cyan-100 text-cyan-800 text-xs flex items-center justify-center font-bold border border-cyan-300">1</span>
+                        專案基礎規格
+                    </h2>
+                    <span class="text-xs text-slate-500"><i class="fa-regular fa-clock mr-1"></i>台灣國定假日自動扣除模式</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">專案名稱 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="projectName" oninput="saveFormDraft()" placeholder="例：2026 企業官網改版與 APP 啟動專案" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">PM 負責人 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="pmName" oninput="updatePmNameInTasks()" placeholder="例：Alex Chen" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">PM Email</label>
+                        <input type="email" id="pmEmail" oninput="saveFormDraft()" placeholder="alex@company.com" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">目標開始日期 <span class="text-rose-500">*</span></label>
+                        <input type="date" id="startDate" onchange="saveFormDraft()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">目標完成期限 (選填參考)</label>
+                        <input type="date" id="targetEndDate" onchange="saveFormDraft()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step Card 2: Tasks & Subtasks -->
+            <div class="glass-panel rounded-2xl p-6 shadow-sm border border-slate-200 bg-white">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h2 class="text-md font-bold text-cyan-700 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-cyan-100 text-cyan-800 text-xs flex items-center justify-center font-bold border border-cyan-300">2</span>
+                        工項規劃與相依性 (工作天數 Days)
+                    </h2>
+                    <button type="button" onclick="addMainTask()" class="text-xs bg-cyan-600 hover:bg-cyan-700 text-white font-medium px-3 py-1.5 rounded-lg transition duration-150 flex items-center gap-1 shadow-md shadow-cyan-600/20">
+                        <i class="fa-solid fa-plus"></i> 新增主工項
+                    </button>
+                </div>
+
+                <!-- Dynamic Task Container -->
+                <div id="taskListContainer" class="space-y-4">
+                    <!-- Task Items inserted via JS -->
+                </div>
+            </div>
+
+            <!-- Trigger Calculate Button -->
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="calculateAndPreviewSchedule()" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold shadow-lg shadow-cyan-600/20 transition duration-200 flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 執行自動排程並計算時程預覽
+                </button>
+            </div>
+
+        </section>
+
+        <!-- Right Panel: Preview & Gantt Summary (5 cols) -->
+        <section class="lg:col-span-5 space-y-6">
+            
+            <div class="glass-panel rounded-2xl p-6 shadow-lg border border-slate-200 bg-white sticky top-24 tech-glow">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h2 class="text-md font-bold text-cyan-700 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-gantt"></i> 排程結果預覽與匯出
+                    </h2>
+                    <span id="statusBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">尚未計算</span>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyPreview" class="text-center py-12 text-slate-400">
+                    <i class="fa-solid fa-calendar-check text-4xl mb-3 text-slate-300"></i>
+                    <p class="text-sm">請於左側輸入專案資料與工項，<br>並點擊「執行自動排程」按鈕。</p>
+                </div>
+
+                <!-- Calculated Output Area (Hidden by default) -->
+                <div id="calculatedOutput" class="hidden space-y-5">
+                    
+                    <!-- Key KPI Summary Card (Splitted Working Days & Calendar Days) -->
+                    <div class="grid grid-cols-3 gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div>
+                            <p class="text-[11px] text-slate-500 font-medium">扣假工作天</p>
+                            <p class="text-lg font-extrabold text-cyan-700 mt-0.5" id="summaryWorkingDays">0 <span class="text-xs font-normal text-slate-500">Days</span></p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-slate-500 font-medium">含假總歷時</p>
+                            <p class="text-lg font-extrabold text-slate-700 mt-0.5" id="summaryCalendarDays">0 <span class="text-xs font-normal text-slate-500">Days</span></p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-slate-500 font-medium">預計完工日</p>
+                            <p class="text-xs font-bold text-slate-800 mt-1" id="summaryEndDate">2026-00-00</p>
+                            <p class="text-[10px] text-emerald-600 font-semibold mt-0.5" id="targetDateDiffMsg"></p>
+                        </div>
+                    </div>
+
+                    <!-- Holidays Skipped Info -->
+                    <div class="bg-cyan-50 border border-cyan-200 p-3 rounded-lg text-xs text-cyan-900 flex items-start gap-2">
+                        <i class="fa-solid fa-circle-info text-cyan-600 mt-0.5"></i>
+                        <div>
+                            <span>已自動依據台灣節日扣除 <strong id="holidayCount" class="font-bold text-cyan-700">0</strong> 天國定假日與週末。</span>
+                        </div>
+                    </div>
+
+                    <!-- Gantt Schedule List -->
+                    <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        <label class="block text-xs font-bold text-slate-700">各項目推算時程明細：</label>
+                        <div id="ganttTimelineList" class="space-y-2">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Google Sheet Export Block -->
+                    <div class="pt-4 border-t border-slate-200 space-y-3">
+                        <label class="block text-xs font-semibold text-slate-700">
+                            Google Apps Script Web App URL 
+                            <a href="javascript:void(0)" onclick="toggleGasModal()" class="text-cyan-600 underline ml-1 hover:text-cyan-700 font-normal">如何取得？</a>
+                        </label>
+                        <input type="text" id="gasUrlInput" oninput="saveFormDraft()" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition">
+
+                        <button type="button" onclick="sendToGoogleSheet()" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition duration-150 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-excel"></i> 確定同步寫入 Google Sheet 文件
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Custom Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMsg" class="text-xs font-medium">提示訊息</span>
+    </div>
+
+    <!-- Reset Form Modal -->
+    <div id="resetModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center gap-3 text-rose-600">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                <h3 class="text-md font-bold text-slate-900">確定重置表單？</h3>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">此動作將會清除所有已輸入的專案資料、工項與暫存草稿。清除後無法復原。</p>
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button onclick="closeResetModal()" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">取消</button>
+                <button onclick="confirmClearDraft()" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition">確定清除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAS Helper Modal -->
+    <div id="gasModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="text-md font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-gears text-cyan-600"></i> Google Apps Script (GAS) 後端設定步驟
+                </h3>
+                <button onclick="toggleGasModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-600">
+                <p>1. 開啟您的目標 Google Sheet，點選選單 **擴充功能 (Extensions) ➔ Apps Script**。</p>
+                <p>2. 刪除原本所有程式碼，將下方這段代碼 **完全複製並貼上**：</p>
+                
+                <div class="relative">
+                    <pre class="bg-slate-900 text-cyan-300 rounded-lg p-3 text-[11px] overflow-x-auto select-all border border-slate-800" id="gasScriptCode">
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    // 1. 寫入【專案概觀】Sheet
+    var summarySheet = ss.getSheetByName("專案概觀");
+    if (!summarySheet) {
+      summarySheet = ss.insertSheet("專案概觀");
+    }
+    if (summarySheet.getLastRow() === 0) {
+      summarySheet.appendRow([
+        "專案名稱", "PM 負責人", "PM Email", "專案開始日", "預計完工日", "扣假工作天", "含假歷時天", "提交時間"
+      ]);
+      var summaryHeader = summarySheet.getRange(1, 1, 1, 8);
+      summaryHeader.setFontWeight("bold").setBackground("#0d9488").setFontColor("#ffffff");
+    }
+    
+    var timestamp = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
+    
+    summarySheet.appendRow([
+      data.projectName,
+      data.pmName,
+      data.pmEmail,
+      data.startDate,
+      data.projectEndDate,
+      data.totalWorkingDays,
+      data.totalCalendarDays,
+      timestamp
+    ]);
+    
+    var sumLastRow = summarySheet.getLastRow();
+    if (sumLastRow > 1) {
+      summarySheet.getRange(2, 4, sumLastRow - 1, 4).setHorizontalAlignment("center");
+    }
+    summarySheet.autoResizeColumns(1, 8);
+    
+    // 初始化變更紀錄區塊（若尚無）
+    initChangeLogHeader(summarySheet);
+    
+    // 2. 寫入【時程明細】Sheet
+    var detailSheet = ss.getSheetByName("時程明細");
+    if (!detailSheet) {
+      detailSheet = ss.insertSheet("時程明細");
+    }
+    if (detailSheet.getLastRow() === 0) {
+      detailSheet.appendRow([
+        "工項名稱", "工項類別", "工項負責人", "前置相依項目", "工天 (Days)", "預計開始日", "預計完成日"
+      ]);
+      var detailHeader = detailSheet.getRange(1, 1, 1, 7);
+      detailHeader.setFontWeight("bold").setBackground("#0d9488").setFontColor("#ffffff");
+    }
+    
+    data.tasks.forEach(function(task) {
+      detailSheet.appendRow([
+        task.name,
+        task.type,
+        task.assignee || data.pmName,
+        task.dependencyName || "無",
+        task.duration,
+        task.startDate,
+        task.endDate
+      ]);
+      
+      var rNum = detailSheet.getLastRow();
+      // 將「主工項」之「工項名稱」(第1欄) 設為 11 號字、黑色粗體
+      if (task.type === "主工項") {
+        detailSheet.getRange(rNum, 1).setFontSize(11).setFontWeight("bold").setFontColor("#000000");
+      }
+    });
+    
+    var detLastRow = detailSheet.getLastRow();
+    if (detLastRow > 1) {
+      detailSheet.getRange(2, 2, detLastRow - 1, 1).setHorizontalAlignment("center"); // B: 工項類別
+      detailSheet.getRange(2, 3, detLastRow - 1, 1).setHorizontalAlignment("center"); // C: 工項負責人
+      detailSheet.getRange(2, 5, detLastRow - 1, 1).setHorizontalAlignment("center"); // E: 工天
+      detailSheet.getRange(2, 6, detLastRow - 1, 1).setHorizontalAlignment("center"); // F: 預計開始日
+      detailSheet.getRange(2, 7, detLastRow - 1, 1).setHorizontalAlignment("center"); // G: 預計完成日
+    }
+    
+    detailSheet.autoResizeColumns(1, 7);
+    
+    return ContentService.createTextOutput(JSON.stringify({ "status": "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function initChangeLogHeader(summarySheet) {
+  var values = summarySheet.getDataRange().getValues();
+  var hasLogHeader = false;
+  for (var i = 0; i < values.length; i++) {
+    if (values[i][0] === "【變更紀錄區塊】") {
+      hasLogHeader = true;
+      break;
+    }
+  }
+  if (!hasLogHeader) {
+    summarySheet.appendRow([""]); // 空列隔離
+    summarySheet.appendRow(["【變更紀錄區塊】"]);
+    var sectionHeader = summarySheet.getRange(summarySheet.getLastRow(), 1, 1, 6);
+    sectionHeader.setFontWeight("bold").setBackground("#f1f5f9").setFontColor("#0f172a");
+    
+    summarySheet.appendRow(["異動時間", "修改說明 / 觸發位置", "更新後專案開始日", "更新後預計完工日", "扣假工作天", "含假歷時天"]);
+    var logHeader = summarySheet.getRange(summarySheet.getLastRow(), 1, 1, 6);
+    logHeader.setFontWeight("bold").setBackground("#0284c7").setFontColor("#ffffff");
+  }
+}
+
+// ----------------------------------------------------
+// 自動計算推導：當在 Google Sheet 修改「工天」、「預計開始日」或「預計完成日」時觸發
+// ----------------------------------------------------
+function onEdit(e) {
+  var range = e.range;
+  var sheet = range.getSheet();
+  
+  if (sheet.getName() !== "時程明細") return;
+  
+  var col = range.getColumn();
+  var row = range.getRow();
+  
+  // 監聽修改「工天(E欄/第5欄)」、「預計開始日(F欄/第6欄)」或「預計完成日(G欄/第7欄)」
+  if ((col === 5 || col === 6 || col === 7) && row > 1) {
+    var colNames = { 5: "工天", 6: "預計開始日", 7: "預計完成日" };
+    var taskName = sheet.getRange(row, 1).getValue();
+    
+    var valObj = range.getValue();
+    var newValStr = (valObj instanceof Date) ? formatDate(valObj) : (e.value !== undefined ? String(e.value) : String(valObj));
+    var oldValStr = e.oldValue !== undefined ? String(e.oldValue) : "原值";
+    
+    if (col === 6 || col === 7) {
+      if (oldValStr && !isNaN(Date.parse(oldValStr)) && oldValStr.length > 10) {
+        try { oldValStr = formatDate(new Date(oldValStr)); } catch(err) {}
+      }
+    }
+    
+    var changeDesc = "修改第 " + row + " 列工項「" + taskName + "」的【" + colNames[col] + "】: " + oldValStr + " ➔ " + newValStr;
+    
+    recalculateSheetSchedule(sheet, row, col, changeDesc);
+  }
+}
+
+function recalculateSheetSchedule(sheet, editedRow, editedCol, changeDesc) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return;
+  
+  var data = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
+  var taskMap = {};
+  var taskOrder = [];
+  
+  // 1. 建立工項索引 map
+  for (var i = 0; i < data.length; i++) {
+    var currentRowNum = i + 2;
+    var taskName = String(data[i][0]).trim();
+    var taskType = String(data[i][1]).trim();
+    var duration = parseInt(data[i][4], 10) || 1;
+    var rawStart = data[i][5];
+    var rawEnd = data[i][6];
+    var depName = String(data[i][3]).trim();
+    
+    var startDateObj = (rawStart instanceof Date) ? rawStart : new Date(rawStart);
+    if (isNaN(startDateObj.getTime())) startDateObj = new Date();
+    
+    // 若使用者修改的是「預計完成日」(G欄/第7欄)，則反推計算工天 (Days)
+    if (editedCol === 7 && currentRowNum === editedRow) {
+      var endDateObj = (rawEnd instanceof Date) ? rawEnd : new Date(rawEnd);
+      if (!isNaN(endDateObj.getTime()) && endDateObj >= startDateObj) {
+        duration = countWorkingDays(startDateObj, endDateObj);
+        sheet.getRange(currentRowNum, 5).setValue(duration);
+      }
+    }
+    
+    taskMap[taskName] = {
+      rowIndex: i,
+      name: taskName,
+      type: taskType,
+      depName: depName,
+      duration: duration,
+      startDate: startDateObj,
+      endDate: null
+    };
+    taskOrder.push(taskName);
+  }
+  
+  // 2. 多輪疊代推算相依工項起訖日（雙向縮短/延長皆可自動反應）
+  var changed = true;
+  var maxPasses = taskOrder.length + 2;
+  
+  while (changed && maxPasses > 0) {
+    changed = false;
+    maxPasses--;
+    
+    for (var k = 0; k < taskOrder.length; k++) {
+      var key = taskOrder[k];
+      var task = taskMap[key];
+      var rNum = task.rowIndex + 2;
+      
+      var targetStart = new Date(task.startDate.getTime());
+      
+      // 若有前置相依項目，且該相依項目已存在
+      if (task.depName && task.depName !== "無" && taskMap[task.depName] && taskMap[task.depName].endDate) {
+        var depEnd = taskMap[task.depName].endDate;
+        var calcStart = getNextWorkingDay(depEnd);
+        
+        if (!(editedCol === 6 && rNum === editedRow)) {
+          targetStart = calcStart;
+        } else {
+          if (targetStart < calcStart) {
+            targetStart = calcStart;
+          }
+        }
+      }
+      
+      var targetEnd = addWorkingDays(targetStart, task.duration);
+      
+      if (!task.endDate || task.startDate.getTime() !== targetStart.getTime() || task.endDate.getTime() !== targetEnd.getTime()) {
+        task.startDate = targetStart;
+        task.endDate = targetEnd;
+        changed = true;
+      }
+    }
+  }
+  
+  var earliestProjectStart = new Date(8640000000000000);
+  var latestProjectEnd = new Date(0);
+  
+  for (var k = 0; k < taskOrder.length; k++) {
+    var t = taskMap[taskOrder[k]];
+    if (t.startDate < earliestProjectStart) earliestProjectStart = t.startDate;
+    if (t.endDate > latestProjectEnd) latestProjectEnd = t.endDate;
+  }
+  
+  // 3. 寫回【時程明細】試算表
+  for (var k = 0; k < taskOrder.length; k++) {
+    var t = taskMap[taskOrder[k]];
+    var r = t.rowIndex + 2;
+    
+    var startStr = formatDate(t.startDate);
+    var endStr = formatDate(t.endDate);
+    
+    sheet.getRange(r, 6).setValue(startStr); // F欄: 預計開始日
+    sheet.getRange(r, 7).setValue(endStr);   // G欄: 預計完成日
+  }
+  
+  // 4. 同步更新【專案概觀】
+  var totalWorkingDays = countWorkingDays(earliestProjectStart, latestProjectEnd);
+  var totalCalendarDays = countCalendarDays(earliestProjectStart, latestProjectEnd);
+  var startStrFormatted = formatDate(earliestProjectStart);
+  var endStrFormatted = formatDate(latestProjectEnd);
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var summarySheet = ss.getSheetByName("專案概觀");
+  if (summarySheet) {
+    if (summarySheet.getLastRow() >= 2) {
+      summarySheet.getRange(2, 4).setValue(startStrFormatted); // D欄: 專案開始日
+      summarySheet.getRange(2, 5).setValue(endStrFormatted);   // E欄: 預計完工日
+      summarySheet.getRange(2, 6).setValue(totalWorkingDays);  // F欄: 扣假工作天
+      summarySheet.getRange(2, 7).setValue(totalCalendarDays); // G欄: 含假歷時天
+    }
+    
+    initChangeLogHeader(summarySheet);
+    
+    var timestamp = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
+    summarySheet.appendRow([
+      timestamp,
+      changeDesc || "修改時程明細",
+      startStrFormatted,
+      endStrFormatted,
+      totalWorkingDays,
+      totalCalendarDays
+    ]);
+    
+    var newLogLine = summarySheet.getLastRow();
+    summarySheet.getRange(newLogLine, 1).setHorizontalAlignment("center");
+    summarySheet.getRange(newLogLine, 3, 1, 4).setHorizontalAlignment("center");
+    summarySheet.autoResizeColumns(1, 8);
+  }
+}
+
+function countWorkingDays(startDate, endDate) {
+  var cur = new Date(startDate.getTime());
+  var end = new Date(endDate.getTime());
+  if (cur > end) return 1;
+  
+  var count = 0;
+  while (cur <= end) {
+    if (!isWeekend(cur)) {
+      count++;
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+  return count > 0 ? count : 1;
+}
+
+function countCalendarDays(startDate, endDate) {
+  var diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+  var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  return diffDays;
+}
+
+function isWeekend(d) {
+  var day = d.getDay();
+  return day === 0 || day === 6;
+}
+
+function addWorkingDays(startDate, days) {
+  var cur = new Date(startDate.getTime());
+  while (isWeekend(cur)) {
+    cur.setDate(cur.getDate() + 1);
+  }
+  var count = 1;
+  while (count < days) {
+    cur.setDate(cur.getDate() + 1);
+    if (!isWeekend(cur)) {
+      count++;
+    }
+  }
+  return cur;
+}
+
+function getNextWorkingDay(d) {
+  var next = new Date(d.getTime());
+  next.setDate(next.getDate() + 1);
+  while (isWeekend(next)) {
+    next.setDate(next.getDate() + 1);
+  }
+  return next;
+}
+
+function formatDate(d) {
+  var y = d.getFullYear();
+  var m = ("0" + (d.getMonth() + 1)).slice(-2);
+  var day = ("0" + d.getDate()).slice(-2);
+  return y + "-" + m + "-" + day;
+}</pre>
+                    <button onclick="copyGasScript()" class="absolute top-2 right-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 px-2 py-1 rounded text-[10px]">
+                        <i class="fa-regular fa-copy"></i> 複製代碼
+                    </button>
+                </div>
+
+                <p>3. 點擊右上角 **部署 (Deploy) ➔ 新增部署 (New deployment)**。</p>
+                <p>4. 種類選擇 **Web 應用程式 (Web app)**，設定為：</p>
+                <ul class="list-disc list-inside text-slate-500 pl-2 space-y-1">
+                    <li>執行身份 (Execute as): **我 (Me)**</li>
+                    <li>誰有存取權限 (Who has access): **所有人 (Anyone)** <span class="text-rose-600 font-bold">(極重要！選錯會無法寫入)</span></li>
+                </ul>
+                <p>5. 點擊部署並複製產生的 **Web App URL**（網址必須以 `/exec` 結尾），貼回本工具即可！</p>
+
+                <!-- Troubleshooting Checklist -->
+                <div class="bg-rose-50 border border-rose-200 rounded-lg p-3 space-y-1 text-[11px] text-rose-900 mt-2">
+                    <p class="font-bold flex items-center gap-1.5 text-rose-800">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-600"></i> 沒收到資料？排查 4 大常見原因：
+                    </p>
+                    <ol class="list-decimal list-inside pl-1 space-y-1 text-rose-800">
+                        <li><strong>填錯 URL：</strong>請確認輸入框貼的是 GAS 部署出來的 Web App 網址（以 <code>/exec</code> 結尾），而不是 Google Sheet 試算表本體的網址！</li>
+                        <li><strong>權限未設為所有人：</strong>「誰有存取權限」務必選 <code>Anyone (所有人)</code>。</li>
+                        <li><strong>修改程式碼未發布新版本：</strong>每次修改 GAS 程式碼後，必須點選「管理部署 ➔ 編輯 ➔ 選擇『建立新版本』」才會生效！</li>
+                        <li><strong>雙 Sheet 分離機制：</strong>腳本會自動建立【專案概觀】與【時程明細】兩個 Sheet，請在試算表下方切換查看。</li>
+                    </ol>
+                </div>
+
+                <!-- Google Authorization Guide -->
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-1.5 text-[11px] text-amber-900 mt-2">
+                    <p class="font-bold flex items-center gap-1.5 text-amber-800">
+                        <i class="fa-solid fa-shield-halved text-amber-600"></i> 首次授權出現「Google hasn't verified this app」警告？
+                    </p>
+                    <p class="text-amber-700">這是 Google 對個人自訂 Apps Script 的標準保護機制，請依序點擊：</p>
+                    <ol class="list-decimal list-inside pl-1 space-y-0.5 text-amber-800 font-medium">
+                        <li>點擊左下角的 <strong class="underline">Advanced（進階）</strong></li>
+                        <li>點擊展開後的 <strong class="underline">Go to [專案名稱] (unsafe)（前往專案）</strong></li>
+                        <li>滑到最下方點擊 <strong class="underline">Allow（允許）</strong> 即可順利授權！</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 text-right">
+                <button onclick="toggleGasModal()" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold">我知道了</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. MOCK DATA & CONSTANTS ---
+        const TAIWAN_HOLIDAYS = [
+            "2026-01-01",
+            "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20",
+            "2026-02-28",
+            "2026-04-03", "2026-04-04", "2026-04-05", "2026-04-06",
+            "2026-06-19",
+            "2026-09-25",
+            "2026-10-10",
+            "2027-01-01"
+        ];
+
+        let taskCounter = 0;
+        let subtaskCounter = 0;
+        let calculatedScheduleData = null;
+
+        window.onload = function() {
+            if (!restoreFormDraft()) {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('startDate').value = today;
+                seedSampleTasks();
+            }
+        };
+
+        function saveFormDraft() {
+            const formData = {
+                projectName: document.getElementById('projectName').value,
+                pmName: document.getElementById('pmName').value,
+                pmEmail: document.getElementById('pmEmail').value,
+                startDate: document.getElementById('startDate').value,
+                targetEndDate: document.getElementById('targetEndDate').value,
+                gasUrl: document.getElementById('gasUrlInput').value,
+                tasks: []
+            };
+
+            document.querySelectorAll('.task-item-card').forEach(card => {
+                const mainId = card.dataset.id;
+                const mainTask = {
+                    id: mainId,
+                    name: card.querySelector('.task-name').value,
+                    assignee: card.querySelector('.task-assignee').value,
+                    customStartDate: card.querySelector('.task-start-date').value,
+                    duration: card.querySelector('.task-duration').value,
+                    dependency: card.querySelector('.task-dependency').value,
+                    subtasks: []
+                };
+
+                card.querySelectorAll('.subtask-item-row').forEach(subRow => {
+                    const subDepSelect = subRow.querySelector('.task-dependency');
+                    mainTask.subtasks.push({
+                        id: subRow.dataset.id,
+                        name: subRow.querySelector('.task-name').value,
+                        assignee: subRow.querySelector('.task-assignee').value,
+                        customStartDate: subRow.querySelector('.task-start-date').value,
+                        duration: subRow.querySelector('.task-duration').value,
+                        dependency: subDepSelect ? subDepSelect.value : ""
+                    });
+                });
+
+                formData.tasks.push(mainTask);
+            });
+
+            localStorage.setItem('projectKickoffDraft', JSON.stringify(formData));
+        }
+
+        function restoreFormDraft() {
+            const draftJson = localStorage.getItem('projectKickoffDraft');
+            if (!draftJson) return false;
+
+            try {
+                const draft = JSON.parse(draftJson);
+                document.getElementById('projectName').value = draft.projectName || '';
+                document.getElementById('pmName').value = draft.pmName || '';
+                document.getElementById('pmEmail').value = draft.pmEmail || '';
+                document.getElementById('startDate').value = draft.startDate || new Date().toISOString().split('T')[0];
+                document.getElementById('targetEndDate').value = draft.targetEndDate || '';
+                document.getElementById('gasUrlInput').value = draft.gasUrl || '';
+
+                document.getElementById('taskListContainer').innerHTML = '';
+
+                if (draft.tasks && draft.tasks.length > 0) {
+                    draft.tasks.forEach(m => {
+                        const mainId = addMainTask(m.name, m.duration, m.dependency, m.assignee, m.customStartDate);
+                        if (m.subtasks && m.subtasks.length > 0) {
+                            m.subtasks.forEach(s => {
+                                addSubtask(mainId, s.name, s.duration, s.assignee, s.customStartDate, s.dependency);
+                            });
+                        }
+                    });
+                } else {
+                    seedSampleTasks();
+                }
+                return true;
+            } catch (err) {
+                console.error("Failed to restore draft:", err);
+                return false;
+            }
+        }
+
+        function promptClearDraftModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function confirmClearDraft() {
+            localStorage.removeItem('projectKickoffDraft');
+            location.reload();
+        }
+
+        function seedSampleTasks() {
+            const pmDefault = document.getElementById('pmName').value || "Alex Chen";
+            const m1 = addMainTask("需求訪談與架構規劃", 3, "", pmDefault);
+            const s1 = addSubtask(m1, "確定 UX 流程圖", 2, "Sarah (UX Designer)", "", "");
+            const s2 = addSubtask(m1, "資料庫與 API 規格定義", 2, "David (Tech Lead)", "", s1);
+
+            const m2 = addMainTask("前端 UI/UX 開發", 5, m1, "Ken (Frontend Lead)");
+            addSubtask(m2, "切頁與 RWD 組件開發", 3, "Ken (Frontend Lead)", "", s2);
+
+            addMainTask("系統測試與上線準備", 2, m2, pmDefault);
+        }
+
+        function updatePmNameInTasks() {
+            saveFormDraft();
+        }
+
+        // Add Main Task
+        function addMainTask(name = "", duration = 1, depId = "", assignee = "", customStartDate = "") {
+            taskCounter++;
+            const taskId = `main_${taskCounter}`;
+            const pmVal = document.getElementById('pmName').value.trim();
+            const defaultAssignee = assignee || pmVal || "";
+            
+            const container = document.getElementById('taskListContainer');
+            const taskCard = document.createElement('div');
+            taskCard.className = "bg-white border border-slate-200 rounded-xl p-4 space-y-3 relative task-item-card shadow-sm hover:border-slate-300 transition";
+            taskCard.id = `card_${taskId}`;
+            taskCard.dataset.id = taskId;
+            taskCard.dataset.type = "主工項";
+
+            taskCard.innerHTML = `
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 flex-1">
+                        <span class="text-xs px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 font-mono border border-cyan-200 font-semibold">主工項</span>
+                        <input type="text" oninput="saveFormDraft()" class="task-name bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-800 w-full focus:border-cyan-600 focus:outline-none" placeholder="主工項名稱" value="${name}">
+                    </div>
+                    <button type="button" onclick="removeTaskCard('${taskId}')" class="text-slate-400 hover:text-rose-600 px-2 py-1 text-xs transition"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 mb-0.5">工項負責人</label>
+                        <input type="text" value="${defaultAssignee}" oninput="saveFormDraft()" class="task-assignee bg-slate-50 border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-800 w-full focus:border-cyan-600 focus:outline-none" placeholder="預設 PM">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 mb-0.5">指定開始日 (選填)</label>
+                        <input type="date" value="${customStartDate}" onchange="saveFormDraft()" class="task-start-date bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 w-full focus:border-cyan-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 mb-0.5">預計工天 (Days)</label>
+                        <input type="number" min="1" value="${duration}" oninput="saveFormDraft()" class="task-duration bg-slate-50 border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-800 w-full focus:border-cyan-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 mb-0.5">前置相依項目</label>
+                        <select onchange="saveFormDraft()" class="task-dependency bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs text-slate-700 w-full focus:border-cyan-600 focus:outline-none">
+                            <option value="">-- 無相依 (獨立) --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Subtasks Sub-container -->
+                <div class="pl-4 border-l-2 border-cyan-200 space-y-2 pt-1" id="subtasks_${taskId}">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] text-slate-500 font-bold">子工項清單</span>
+                        <button type="button" onclick="addSubtask('${taskId}')" class="text-[11px] text-cyan-700 hover:text-cyan-800 font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> 新增子工項
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(taskCard);
+            updateAllDependencyDropdowns();
+
+            if(depId) {
+                taskCard.querySelector('.task-dependency').value = depId;
+            }
+
+            saveFormDraft();
+            return taskId;
+        }
+
+        // Add Subtask (Now includes Predecessor Dependency Selection!)
+        function addSubtask(parentMainTaskId, name = "", duration = 1, assignee = "", customStartDate = "", depId = "") {
+            subtaskCounter++;
+            const subtaskId = `sub_${subtaskCounter}`;
+            const subContainer = document.getElementById(`subtasks_${parentMainTaskId}`);
+
+            if (!subContainer) return;
+
+            const parentCard = document.getElementById(`card_${parentMainTaskId}`);
+            const parentAssignee = parentCard ? parentCard.querySelector('.task-assignee').value.trim() : "";
+            const defaultAssignee = assignee || parentAssignee || document.getElementById('pmName').value.trim() || "";
+
+            const subRow = document.createElement('div');
+            subRow.className = "flex flex-col sm:flex-row items-stretch sm:items-center gap-2 subtask-item-row bg-slate-50 p-2 rounded-lg border border-slate-200/60";
+            subRow.id = `card_${subtaskId}`;
+            subRow.dataset.id = subtaskId;
+            subRow.dataset.parentId = parentMainTaskId;
+            subRow.dataset.type = "子工項";
+
+            subRow.innerHTML = `
+                <div class="flex items-center gap-1.5 flex-1 min-w-[140px]">
+                    <i class="fa-solid fa-turn-up rotate-90 text-slate-400 text-[10px] ml-1"></i>
+                    <input type="text" oninput="saveFormDraft()" class="task-name bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 w-full focus:border-cyan-600 focus:outline-none" placeholder="子工項名稱" value="${name}">
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:w-[420px]">
+                    <input type="text" value="${defaultAssignee}" oninput="saveFormDraft()" class="task-assignee bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 focus:border-cyan-600 focus:outline-none" placeholder="負責人">
+                    <input type="date" value="${customStartDate}" onchange="saveFormDraft()" class="task-start-date bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 focus:border-cyan-600 focus:outline-none" title="指定開始日 (選填)">
+                    <input type="number" min="1" value="${duration}" oninput="saveFormDraft()" class="task-duration bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 focus:border-cyan-600 focus:outline-none" title="預計工天 (Days)">
+                    <select onchange="saveFormDraft()" class="task-dependency bg-white border border-slate-200 rounded px-1.5 py-1 text-xs text-slate-700 focus:border-cyan-600 focus:outline-none" title="前置相依項目">
+                        <option value="">-- 無相依 --</option>
+                    </select>
+                </div>
+                <button type="button" onclick="removeSubtaskRow('${subtaskId}')" class="text-slate-400 hover:text-rose-600 px-1 text-xs self-end sm:self-center"><i class="fa-solid fa-xmark"></i></button>
+            `;
+
+            subContainer.appendChild(subRow);
+            updateAllDependencyDropdowns();
+
+            if (depId) {
+                const depSelect = subRow.querySelector('.task-dependency');
+                if (depSelect) depSelect.value = depId;
+            }
+
+            saveFormDraft();
+            return subtaskId;
+        }
+
+        function removeTaskCard(taskId) {
+            const card = document.getElementById(`card_${taskId}`);
+            if (card) {
+                card.remove();
+                updateAllDependencyDropdowns();
+                saveFormDraft();
+            }
+        }
+
+        function removeSubtaskRow(subtaskId) {
+            const row = document.getElementById(`card_${subtaskId}`);
+            if (row) {
+                row.remove();
+                updateAllDependencyDropdowns();
+                saveFormDraft();
+            }
+        }
+
+        function updateAllDependencyDropdowns() {
+            const allTasks = [];
+            document.querySelectorAll('.task-item-card').forEach(card => {
+                const id = card.dataset.id;
+                const nameInput = card.querySelector('.task-name');
+                const name = nameInput ? nameInput.value.trim() : '未命名工項';
+                allTasks.push({ id, name: `[主工項] ${name}` });
+
+                card.querySelectorAll('.subtask-item-row').forEach(subRow => {
+                    const subId = subRow.dataset.id;
+                    const subNameInput = subRow.querySelector('.task-name');
+                    const subName = subNameInput ? subNameInput.value.trim() : '未命名子工項';
+                    allTasks.push({ id: subId, name: ` └─ [子] ${subName}` });
+                });
+            });
+
+            document.querySelectorAll('.task-dependency').forEach(select => {
+                const currentVal = select.value;
+                const parentRow = select.closest('.task-item-card, .subtask-item-row');
+                const selfId = parentRow ? parentRow.dataset.id : '';
+
+                select.innerHTML = '<option value="">-- 無相依 (獨立) --</option>';
+                allTasks.forEach(t => {
+                    if (t.id !== selfId) {
+                        const opt = document.createElement('option');
+                        opt.value = t.id;
+                        opt.textContent = t.name;
+                        select.appendChild(opt);
+                    }
+                });
+                select.value = currentVal;
+            });
+        }
+
+        function isNonWorkingDay(dateObj) {
+            const dayOfWeek = dateObj.getDay();
+            if (dayOfWeek === 0 || dayOfWeek === 6) return true;
+
+            const dateStr = dateObj.toISOString().split('T')[0];
+            return TAIWAN_HOLIDAYS.includes(dateStr);
+        }
+
+        function addWorkingDays(startDateStr, days) {
+            let current = new Date(startDateStr);
+            let holidaysSkippedCount = 0;
+
+            while (isNonWorkingDay(current)) {
+                current.setDate(current.getDate() + 1);
+                holidaysSkippedCount++;
+            }
+
+            const actualStartDateStr = current.toISOString().split('T')[0];
+
+            let workDaysCounted = 1;
+            while (workDaysCounted < days) {
+                current.setDate(current.getDate() + 1);
+                if (!isNonWorkingDay(current)) {
+                    workDaysCounted++;
+                } else {
+                    holidaysSkippedCount++;
+                }
+            }
+
+            const endDateStr = current.toISOString().split('T')[0];
+
+            return {
+                startDate: actualStartDateStr,
+                endDate: endDateStr,
+                endDateObj: new Date(current),
+                holidaysSkipped: holidaysSkippedCount
+            };
+        }
+
+        function getNextWorkingDay(dateStr) {
+            let next = new Date(dateStr);
+            next.setDate(next.getDate() + 1);
+            while (isNonWorkingDay(next)) {
+                next.setDate(next.getDate() + 1);
+            }
+            return next.toISOString().split('T')[0];
+        }
+
+        function countWorkingDaysBetween(startDateStr, endDateStr) {
+            let cur = new Date(startDateStr);
+            const end = new Date(endDateStr);
+            if (cur > end) return 1;
+            let count = 0;
+            while (cur <= end) {
+                if (!isNonWorkingDay(cur)) {
+                    count++;
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+            return count;
+        }
+
+        function countCalendarDaysBetween(startDateStr, endDateStr) {
+            const start = new Date(startDateStr);
+            const end = new Date(endDateStr);
+            const diffTime = Math.abs(end - start);
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        }
+
+        function calculateAndPreviewSchedule() {
+            const projectName = document.getElementById('projectName').value.trim();
+            const pmName = document.getElementById('pmName').value.trim();
+            const projStartDate = document.getElementById('startDate').value;
+
+            if (!projectName || !pmName || !projStartDate) {
+                showToast("請完整填寫專案名稱、PM負責人與目標開始日期！", "error");
+                return;
+            }
+
+            const tasksList = [];
+            document.querySelectorAll('.task-item-card').forEach(card => {
+                const id = card.dataset.id;
+                const name = card.querySelector('.task-name').value.trim() || "未命名主工項";
+                const assignee = card.querySelector('.task-assignee').value.trim() || pmName;
+                const customStartDate = card.querySelector('.task-start-date').value;
+                const duration = parseInt(card.querySelector('.task-duration').value, 10) || 1;
+                const dependencyId = card.querySelector('.task-dependency').value;
+
+                tasksList.push({
+                    id: id,
+                    type: "主工項",
+                    name: name,
+                    assignee: assignee,
+                    customStartDate: customStartDate,
+                    duration: duration,
+                    dependencyId: dependencyId,
+                    startDate: null,
+                    endDate: null
+                });
+
+                card.querySelectorAll('.subtask-item-row').forEach(subRow => {
+                    const subId = subRow.dataset.id;
+                    const subName = subRow.querySelector('.task-name').value.trim() || "未命名子工項";
+                    const subAssignee = subRow.querySelector('.task-assignee').value.trim() || assignee;
+                    const subCustomStartDate = subRow.querySelector('.task-start-date').value;
+                    const subDuration = parseInt(subRow.querySelector('.task-duration').value, 10) || 1;
+                    const subDepSelect = subRow.querySelector('.task-dependency');
+                    const subDependencyId = subDepSelect ? subDepSelect.value : "";
+
+                    tasksList.push({
+                        id: subId,
+                        type: "子工項",
+                        name: subName,
+                        assignee: subAssignee,
+                        customStartDate: subCustomStartDate,
+                        duration: subDuration,
+                        dependencyId: subDependencyId,
+                        startDate: null,
+                        endDate: null
+                    });
+                });
+            });
+
+            if (tasksList.length === 0) {
+                showToast("請至少新增一個工項以進行排程計算", "error");
+                return;
+            }
+
+            const taskMap = {};
+            tasksList.forEach(t => taskMap[t.id] = t);
+
+            let totalHolidaysSkipped = 0;
+            let projectEarliestStart = projStartDate;
+            let projectLatestEndDate = projStartDate;
+
+            let resolvedCount = 0;
+            let maxLoop = tasksList.length * 3;
+
+            while (resolvedCount < tasksList.length && maxLoop > 0) {
+                maxLoop--;
+                tasksList.forEach(task => {
+                    if (task.startDate) return;
+
+                    let calcStart = task.customStartDate || projStartDate;
+
+                    if (task.dependencyId && taskMap[task.dependencyId]) {
+                        const depTask = taskMap[task.dependencyId];
+                        if (!depTask.endDate) return; // Wait until dependency is calculated
+                        const depNextWorkingDay = getNextWorkingDay(depTask.endDate);
+                        if (task.customStartDate) {
+                            calcStart = task.customStartDate > depNextWorkingDay ? task.customStartDate : depNextWorkingDay;
+                        } else {
+                            calcStart = depNextWorkingDay;
+                        }
+                        task.dependencyName = depTask.name;
+                    }
+
+                    const scheduleResult = addWorkingDays(calcStart, task.duration);
+                    task.startDate = scheduleResult.startDate;
+                    task.endDate = scheduleResult.endDate;
+                    totalHolidaysSkipped += scheduleResult.holidaysSkipped;
+
+                    if (!projectEarliestStart || task.startDate < projectEarliestStart) {
+                        projectEarliestStart = task.startDate;
+                    }
+                    if (!projectLatestEndDate || task.endDate > projectLatestEndDate) {
+                        projectLatestEndDate = task.endDate;
+                    }
+
+                    resolvedCount++;
+                });
+            }
+
+            const totalWorkingDays = countWorkingDaysBetween(projectEarliestStart, projectLatestEndDate);
+            const totalCalendarDays = countCalendarDaysBetween(projectEarliestStart, projectLatestEndDate);
+
+            calculatedScheduleData = {
+                projectName,
+                pmName,
+                pmEmail: document.getElementById('pmEmail').value.trim(),
+                startDate: projStartDate,
+                projectEndDate: projectLatestEndDate,
+                totalWorkingDays: totalWorkingDays,
+                totalCalendarDays: totalCalendarDays,
+                tasks: tasksList
+            };
+
+            document.getElementById('emptyPreview').classList.add('hidden');
+            document.getElementById('calculatedOutput').classList.remove('hidden');
+
+            document.getElementById('statusBadge').textContent = "排程完成";
+            document.getElementById('statusBadge').className = "text-xs px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-800 border border-cyan-200 font-semibold";
+
+            document.getElementById('summaryWorkingDays').textContent = totalWorkingDays;
+            document.getElementById('summaryCalendarDays').textContent = totalCalendarDays;
+            document.getElementById('summaryEndDate').textContent = projectLatestEndDate;
+            document.getElementById('holidayCount').textContent = totalHolidaysSkipped;
+
+            const targetEndDate = document.getElementById('targetEndDate').value;
+            const diffMsg = document.getElementById('targetDateDiffMsg');
+            if (targetEndDate) {
+                if (projectLatestEndDate <= targetEndDate) {
+                    diffMsg.textContent = `✓ 符合目標完成期限 (${targetEndDate})`;
+                    diffMsg.className = "text-[10px] text-emerald-600 font-semibold mt-0.5";
+                } else {
+                    diffMsg.textContent = `⚠️ 超出原定目標期限 (${targetEndDate})`;
+                    diffMsg.className = "text-[10px] text-rose-600 font-semibold mt-0.5";
+                }
+            } else {
+                diffMsg.textContent = "";
+            }
+
+            const ganttList = document.getElementById('ganttTimelineList');
+            ganttList.innerHTML = "";
+
+            tasksList.forEach(t => {
+                const item = document.createElement('div');
+                item.className = "bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-xs flex flex-col gap-1 shadow-sm";
+                const isSub = t.type === "子工項";
+                
+                item.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold ${isSub ? 'text-slate-600 pl-3' : 'text-cyan-800'}">
+                            ${isSub ? '└─ ' : ''}${t.name}
+                        </span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-50 text-cyan-800 font-medium border border-cyan-200"><i class="fa-regular fa-user mr-1"></i>${t.assignee}</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-medium">${t.duration} 工天</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                        <span><i class="fa-regular fa-calendar-check mr-1 text-cyan-600"></i>${t.startDate} ~ ${t.endDate}</span>
+                        ${t.dependencyName ? `<span class="text-slate-400">依賴: ${t.dependencyName.substring(0, 8)}...</span>` : ''}
+                    </div>
+                `;
+                ganttList.appendChild(item);
+            });
+
+            showToast("排程計算完畢！已產出預覽與時間軸", "success");
+        }
+
+        async function sendToGoogleSheet() {
+            if (!calculatedScheduleData) {
+                showToast("請先執行自動排程計算！", "error");
+                return;
+            }
+
+            const gasUrl = document.getElementById('gasUrlInput').value.trim();
+            if (!gasUrl) {
+                showToast("請輸入有效的 Google Apps Script Web App URL", "error");
+                return;
+            }
+
+            if (!gasUrl.includes('/exec')) {
+                showToast("網址格式可能不正確！請確認是否為 GAS Web App 網址 (應以 /exec 結尾)", "error");
+            }
+
+            showToast("正在傳送資料至 Google Sheet...", "info");
+
+            try {
+                await fetch(gasUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(calculatedScheduleData)
+                });
+
+                showToast("專案排程已成功同步送出至 Google Sheet！請查看您的試算表。", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("傳送失敗，請確認 GAS URL 與網路連線狀態", "error");
+            }
+        }
+
+        function toggleGasModal() {
+            const modal = document.getElementById('gasModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function copyGasScript() {
+            const scriptText = document.getElementById('gasScriptCode').innerText;
+            document.execCommand('copy');
+            showToast("GAS 腳本已複製到剪貼簿！", "success");
+        }
+
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.textContent = message;
+
+            if (type === "success") {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+            } else if (type === "error") {
+                toastIcon.className = "fa-solid fa-circle-xmark text-rose-400 text-lg";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-cyan-400 text-lg";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
