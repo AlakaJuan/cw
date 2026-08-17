@@ -271,23 +271,22 @@
                     <pre class="bg-slate-900 text-cyan-300 rounded-lg p-3 text-[11px] overflow-x-auto select-all border border-slate-800" id="gasScriptCode">
 function doPost(e) {
   try {
-    var data = JSON.parse(e.postData.contents);
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    const data = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     
     // 1. 寫入【專案概觀】Sheet
-    var summarySheet = ss.getSheetByName("專案概觀");
+    let summarySheet = ss.getSheetByName("專案概觀");
     if (!summarySheet) {
       summarySheet = ss.insertSheet("專案概觀");
     }
+    // 表頭僅在工作表為空時建立文字內容
     if (summarySheet.getLastRow() === 0) {
       summarySheet.appendRow([
         "專案名稱", "PM 負責人", "PM Email", "專案開始日", "預計完工日", "扣假工作天", "含假歷時天", "提交時間"
       ]);
-      var summaryHeader = summarySheet.getRange(1, 1, 1, 8);
-      summaryHeader.setFontWeight("bold").setBackground("#0d9488").setFontColor("#ffffff");
     }
     
-    var timestamp = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
+    const timestamp = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
     
     summarySheet.appendRow([
       data.projectName,
@@ -300,17 +299,14 @@ function doPost(e) {
       timestamp
     ]);
     
-    var sumLastRow = summarySheet.getLastRow();
-    if (sumLastRow > 1) {
-      summarySheet.getRange(2, 4, sumLastRow - 1, 4).setHorizontalAlignment("center");
-    }
-    summarySheet.autoResizeColumns(1, 8);
-    
     // 初始化變更紀錄區塊（若尚無）
     initChangeLogHeader(summarySheet);
     
+    // 依據字元數值動態配置【專案概觀】最佳欄寬 (第 1 至 8 欄)
+    autoFitColumnsByCharLength(summarySheet, 1, 8);
+    
     // 2. 寫入【時程明細】Sheet
-    var detailSheet = ss.getSheetByName("時程明細");
+    let detailSheet = ss.getSheetByName("時程明細");
     if (!detailSheet) {
       detailSheet = ss.insertSheet("時程明細");
     }
@@ -318,12 +314,12 @@ function doPost(e) {
       detailSheet.appendRow([
         "工項名稱", "工項類別", "工項負責人", "前置相依項目", "工天 (Days)", "預計開始日", "預計完成日"
       ]);
-      var detailHeader = detailSheet.getRange(1, 1, 1, 7);
-      detailHeader.setFontWeight("bold").setBackground("#0d9488").setFontColor("#ffffff");
     }
     
-    data.tasks.forEach(function(task) {
-      detailSheet.appendRow([
+    // 採用批次寫入（setValues）取代逐列 appendRow 以提升執行效能
+    if (Array.isArray(data.tasks) && data.tasks.length > 0) {
+      const startRow = detailSheet.getLastRow() + 1;
+      const rowsToAppend = data.tasks.map(task => [
         task.name,
         task.type,
         task.assignee || data.pmName,
@@ -333,23 +329,27 @@ function doPost(e) {
         task.endDate
       ]);
       
-      var rNum = detailSheet.getLastRow();
-      // 將「主工項」之「工項名稱」(第1欄) 設為 11 號字、黑色粗體
-      if (task.type === "主工項") {
-        detailSheet.getRange(rNum, 1).setFontSize(11).setFontWeight("bold").setFontColor("#000000");
-      }
-    });
-    
-    var detLastRow = detailSheet.getLastRow();
-    if (detLastRow > 1) {
-      detailSheet.getRange(2, 2, detLastRow - 1, 1).setHorizontalAlignment("center"); // B: 工項類別
-      detailSheet.getRange(2, 3, detLastRow - 1, 1).setHorizontalAlignment("center"); // C: 工項負責人
-      detailSheet.getRange(2, 5, detLastRow - 1, 1).setHorizontalAlignment("center"); // E: 工天
-      detailSheet.getRange(2, 6, detLastRow - 1, 1).setHorizontalAlignment("center"); // F: 預計開始日
-      detailSheet.getRange(2, 7, detLastRow - 1, 1).setHorizontalAlignment("center"); // G: 預計完成日
+      detailSheet.getRange(
+        startRow,
+        1,
+        rowsToAppend.length,
+        7
+      ).setValues(rowsToAppend);
+
+      // 當「工項類別」為「主工項」時，設定「工項名稱」為 11.5 號字、黑色粗體
+      data.tasks.forEach((task, index) => {
+        if (task.type === "主工項") {
+          const rNum = startRow + index;
+          detailSheet.getRange(rNum, 1)
+            .setFontSize(11.5)
+            .setFontWeight("bold")
+            .setFontColor("#000000");
+        }
+      });
     }
     
-    detailSheet.autoResizeColumns(1, 7);
+    // 依據字元數值動態配置【時程明細】最佳欄寬 (第 1 至 7 欄)
+    autoFitColumnsByCharLength(detailSheet, 1, 7);
     
     return ContentService.createTextOutput(JSON.stringify({ "status": "success" }))
       .setMimeType(ContentService.MimeType.JSON);
@@ -359,10 +359,53 @@ function doPost(e) {
   }
 }
 
+/**
+ * 依據資料字元數值動態計算並設定最佳欄位寬度
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet 目標工作表
+ * @param {number} startCol 起始欄位 (從 1 開始)
+ * @param {number} endCol 結束欄位
+ */
+function autoFitColumnsByCharLength(sheet, startCol, endCol) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow === 0) return;
+
+  // 取得格式化後的顯示文字內容 (DisplayValues)
+  const numCols = endCol - startCol + 1;
+  const data = sheet.getRange(1, startCol, lastRow, numCols).getDisplayValues();
+
+  for (let c = 0; c < numCols; c++) {
+    let maxCharUnits = 0;
+    
+    for (let r = 0; r < data.length; r++) {
+      const cellValue = String(data[r][c] || "");
+      let charUnits = 0;
+      
+      // 計算視覺字元長度：全形/中文字元算 2 個單位，半形/英數字元算 1 個單位
+      for (let i = 0; i < cellValue.length; i++) {
+        charUnits += cellValue.charCodeAt(i) > 255 ? 2 : 1;
+      }
+      
+      if (charUnits > maxCharUnits) {
+        maxCharUnits = charUnits;
+      }
+    }
+
+    // 寬度換算公式：(字元單位 * 8.5px) + 24px 左右邊距內距
+    let calculatedWidth = Math.ceil(maxCharUnits * 8.5) + 24;
+
+    // 安全界線設定：最小 80px，最大 350px (防止極長文字破壞版面)
+    const minWidth = 80;
+    const maxWidth = 350;
+    const finalWidth = Math.min(Math.max(calculatedWidth, minWidth), maxWidth);
+
+    sheet.setColumnWidth(startCol + c, finalWidth);
+  }
+}
+
 function initChangeLogHeader(summarySheet) {
-  var values = summarySheet.getDataRange().getValues();
-  var hasLogHeader = false;
-  for (var i = 0; i < values.length; i++) {
+  const values = summarySheet.getDataRange().getValues();
+  let hasLogHeader = false;
+  for (let i = 0; i < values.length; i++) {
     if (values[i][0] === "【變更紀錄區塊】") {
       hasLogHeader = true;
       break;
@@ -371,12 +414,7 @@ function initChangeLogHeader(summarySheet) {
   if (!hasLogHeader) {
     summarySheet.appendRow([""]); // 空列隔離
     summarySheet.appendRow(["【變更紀錄區塊】"]);
-    var sectionHeader = summarySheet.getRange(summarySheet.getLastRow(), 1, 1, 6);
-    sectionHeader.setFontWeight("bold").setBackground("#f1f5f9").setFontColor("#0f172a");
-    
     summarySheet.appendRow(["異動時間", "修改說明 / 觸發位置", "更新後專案開始日", "更新後預計完工日", "扣假工作天", "含假歷時天"]);
-    var logHeader = summarySheet.getRange(summarySheet.getLastRow(), 1, 1, 6);
-    logHeader.setFontWeight("bold").setBackground("#0284c7").setFontColor("#ffffff");
   }
 }
 
@@ -384,22 +422,23 @@ function initChangeLogHeader(summarySheet) {
 // 自動計算推導：當在 Google Sheet 修改「工天」、「預計開始日」或「預計完成日」時觸發
 // ----------------------------------------------------
 function onEdit(e) {
-  var range = e.range;
-  var sheet = range.getSheet();
+  if (!e || !e.range) return;
+  const range = e.range;
+  const sheet = range.getSheet();
   
   if (sheet.getName() !== "時程明細") return;
   
-  var col = range.getColumn();
-  var row = range.getRow();
+  const col = range.getColumn();
+  const row = range.getRow();
   
   // 監聽修改「工天(E欄/第5欄)」、「預計開始日(F欄/第6欄)」或「預計完成日(G欄/第7欄)」
   if ((col === 5 || col === 6 || col === 7) && row > 1) {
-    var colNames = { 5: "工天", 6: "預計開始日", 7: "預計完成日" };
-    var taskName = sheet.getRange(row, 1).getValue();
+    const colNames = { 5: "工天", 6: "預計開始日", 7: "預計完成日" };
+    const taskName = sheet.getRange(row, 1).getValue();
     
-    var valObj = range.getValue();
-    var newValStr = (valObj instanceof Date) ? formatDate(valObj) : (e.value !== undefined ? String(e.value) : String(valObj));
-    var oldValStr = e.oldValue !== undefined ? String(e.oldValue) : "原值";
+    const valObj = range.getValue();
+    let newValStr = (valObj instanceof Date) ? formatDate(valObj) : (e.value !== undefined ? String(e.value) : String(valObj));
+    let oldValStr = e.oldValue !== undefined ? String(e.oldValue) : "原值";
     
     if (col === 6 || col === 7) {
       if (oldValStr && !isNaN(Date.parse(oldValStr)) && oldValStr.length > 10) {
@@ -407,36 +446,36 @@ function onEdit(e) {
       }
     }
     
-    var changeDesc = "修改第 " + row + " 列工項「" + taskName + "」的【" + colNames[col] + "】: " + oldValStr + " ➔ " + newValStr;
+    const changeDesc = `修改第 ${row} 列工項「${taskName}」的【${colNames[col]}】: ${oldValStr} ➔ ${newValStr}`;
     
     recalculateSheetSchedule(sheet, row, col, changeDesc);
   }
 }
 
 function recalculateSheetSchedule(sheet, editedRow, editedCol, changeDesc) {
-  var lastRow = sheet.getLastRow();
+  const lastRow = sheet.getLastRow();
   if (lastRow <= 1) return;
   
-  var data = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
-  var taskMap = {};
-  var taskOrder = [];
+  const data = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
+  const taskMap = {};
+  const taskOrder = [];
   
   // 1. 建立工項索引 map
-  for (var i = 0; i < data.length; i++) {
-    var currentRowNum = i + 2;
-    var taskName = String(data[i][0]).trim();
-    var taskType = String(data[i][1]).trim();
-    var duration = parseInt(data[i][4], 10) || 1;
-    var rawStart = data[i][5];
-    var rawEnd = data[i][6];
-    var depName = String(data[i][3]).trim();
+  for (let i = 0; i < data.length; i++) {
+    const currentRowNum = i + 2;
+    const taskName = String(data[i][0]).trim();
+    const taskType = String(data[i][1]).trim();
+    let duration = parseInt(data[i][4], 10) || 1;
+    const rawStart = data[i][5];
+    const rawEnd = data[i][6];
+    const depName = String(data[i][3]).trim();
     
-    var startDateObj = (rawStart instanceof Date) ? rawStart : new Date(rawStart);
+    let startDateObj = (rawStart instanceof Date) ? rawStart : new Date(rawStart);
     if (isNaN(startDateObj.getTime())) startDateObj = new Date();
     
     // 若使用者修改的是「預計完成日」(G欄/第7欄)，則反推計算工天 (Days)
     if (editedCol === 7 && currentRowNum === editedRow) {
-      var endDateObj = (rawEnd instanceof Date) ? rawEnd : new Date(rawEnd);
+      const endDateObj = (rawEnd instanceof Date) ? rawEnd : new Date(rawEnd);
       if (!isNaN(endDateObj.getTime()) && endDateObj >= startDateObj) {
         duration = countWorkingDays(startDateObj, endDateObj);
         sheet.getRange(currentRowNum, 5).setValue(duration);
@@ -456,24 +495,24 @@ function recalculateSheetSchedule(sheet, editedRow, editedCol, changeDesc) {
   }
   
   // 2. 多輪疊代推算相依工項起訖日（雙向縮短/延長皆可自動反應）
-  var changed = true;
-  var maxPasses = taskOrder.length + 2;
+  let changed = true;
+  let maxPasses = taskOrder.length + 2;
   
   while (changed && maxPasses > 0) {
     changed = false;
     maxPasses--;
     
-    for (var k = 0; k < taskOrder.length; k++) {
-      var key = taskOrder[k];
-      var task = taskMap[key];
-      var rNum = task.rowIndex + 2;
+    for (let k = 0; k < taskOrder.length; k++) {
+      const key = taskOrder[k];
+      const task = taskMap[key];
+      const rNum = task.rowIndex + 2;
       
-      var targetStart = new Date(task.startDate.getTime());
+      let targetStart = new Date(task.startDate.getTime());
       
       // 若有前置相依項目，且該相依項目已存在
       if (task.depName && task.depName !== "無" && taskMap[task.depName] && taskMap[task.depName].endDate) {
-        var depEnd = taskMap[task.depName].endDate;
-        var calcStart = getNextWorkingDay(depEnd);
+        const depEnd = taskMap[task.depName].endDate;
+        const calcStart = getNextWorkingDay(depEnd);
         
         if (!(editedCol === 6 && rNum === editedRow)) {
           targetStart = calcStart;
@@ -484,7 +523,7 @@ function recalculateSheetSchedule(sheet, editedRow, editedCol, changeDesc) {
         }
       }
       
-      var targetEnd = addWorkingDays(targetStart, task.duration);
+      const targetEnd = addWorkingDays(targetStart, task.duration);
       
       if (!task.endDate || task.startDate.getTime() !== targetStart.getTime() || task.endDate.getTime() !== targetEnd.getTime()) {
         task.startDate = targetStart;
@@ -494,35 +533,35 @@ function recalculateSheetSchedule(sheet, editedRow, editedCol, changeDesc) {
     }
   }
   
-  var earliestProjectStart = new Date(8640000000000000);
-  var latestProjectEnd = new Date(0);
+  let earliestProjectStart = new Date(8640000000000000);
+  let latestProjectEnd = new Date(0);
   
-  for (var k = 0; k < taskOrder.length; k++) {
-    var t = taskMap[taskOrder[k]];
+  for (let k = 0; k < taskOrder.length; k++) {
+    const t = taskMap[taskOrder[k]];
     if (t.startDate < earliestProjectStart) earliestProjectStart = t.startDate;
     if (t.endDate > latestProjectEnd) latestProjectEnd = t.endDate;
   }
   
   // 3. 寫回【時程明細】試算表
-  for (var k = 0; k < taskOrder.length; k++) {
-    var t = taskMap[taskOrder[k]];
-    var r = t.rowIndex + 2;
+  for (let k = 0; k < taskOrder.length; k++) {
+    const t = taskMap[taskOrder[k]];
+    const r = t.rowIndex + 2;
     
-    var startStr = formatDate(t.startDate);
-    var endStr = formatDate(t.endDate);
+    const startStr = formatDate(t.startDate);
+    const endStr = formatDate(t.endDate);
     
     sheet.getRange(r, 6).setValue(startStr); // F欄: 預計開始日
     sheet.getRange(r, 7).setValue(endStr);   // G欄: 預計完成日
   }
   
   // 4. 同步更新【專案概觀】
-  var totalWorkingDays = countWorkingDays(earliestProjectStart, latestProjectEnd);
-  var totalCalendarDays = countCalendarDays(earliestProjectStart, latestProjectEnd);
-  var startStrFormatted = formatDate(earliestProjectStart);
-  var endStrFormatted = formatDate(latestProjectEnd);
+  const totalWorkingDays = countWorkingDays(earliestProjectStart, latestProjectEnd);
+  const totalCalendarDays = countCalendarDays(earliestProjectStart, latestProjectEnd);
+  const startStrFormatted = formatDate(earliestProjectStart);
+  const endStrFormatted = formatDate(latestProjectEnd);
   
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var summarySheet = ss.getSheetByName("專案概觀");
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const summarySheet = ss.getSheetByName("專案概觀");
   if (summarySheet) {
     if (summarySheet.getLastRow() >= 2) {
       summarySheet.getRange(2, 4).setValue(startStrFormatted); // D欄: 專案開始日
@@ -533,7 +572,7 @@ function recalculateSheetSchedule(sheet, editedRow, editedCol, changeDesc) {
     
     initChangeLogHeader(summarySheet);
     
-    var timestamp = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
+    const timestamp = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
     summarySheet.appendRow([
       timestamp,
       changeDesc || "修改時程明細",
@@ -542,20 +581,18 @@ function recalculateSheetSchedule(sheet, editedRow, editedCol, changeDesc) {
       totalWorkingDays,
       totalCalendarDays
     ]);
-    
-    var newLogLine = summarySheet.getLastRow();
-    summarySheet.getRange(newLogLine, 1).setHorizontalAlignment("center");
-    summarySheet.getRange(newLogLine, 3, 1, 4).setHorizontalAlignment("center");
-    summarySheet.autoResizeColumns(1, 8);
   }
 }
 
+// ----------------------------------------------------
+// 工具函式
+// ----------------------------------------------------
 function countWorkingDays(startDate, endDate) {
-  var cur = new Date(startDate.getTime());
-  var end = new Date(endDate.getTime());
+  const cur = new Date(startDate.getTime());
+  const end = new Date(endDate.getTime());
   if (cur > end) return 1;
   
-  var count = 0;
+  let count = 0;
   while (cur <= end) {
     if (!isWeekend(cur)) {
       count++;
@@ -566,22 +603,21 @@ function countWorkingDays(startDate, endDate) {
 }
 
 function countCalendarDays(startDate, endDate) {
-  var diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-  var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-  return diffDays;
+  const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 }
 
 function isWeekend(d) {
-  var day = d.getDay();
+  const day = d.getDay();
   return day === 0 || day === 6;
 }
 
 function addWorkingDays(startDate, days) {
-  var cur = new Date(startDate.getTime());
+  const cur = new Date(startDate.getTime());
   while (isWeekend(cur)) {
     cur.setDate(cur.getDate() + 1);
   }
-  var count = 1;
+  let count = 1;
   while (count < days) {
     cur.setDate(cur.getDate() + 1);
     if (!isWeekend(cur)) {
@@ -592,7 +628,7 @@ function addWorkingDays(startDate, days) {
 }
 
 function getNextWorkingDay(d) {
-  var next = new Date(d.getTime());
+  const next = new Date(d.getTime());
   next.setDate(next.getDate() + 1);
   while (isWeekend(next)) {
     next.setDate(next.getDate() + 1);
@@ -601,11 +637,12 @@ function getNextWorkingDay(d) {
 }
 
 function formatDate(d) {
-  var y = d.getFullYear();
-  var m = ("0" + (d.getMonth() + 1)).slice(-2);
-  var day = ("0" + d.getDate()).slice(-2);
-  return y + "-" + m + "-" + day;
-}</pre>
+  const y = d.getFullYear();
+  const m = ("0" + (d.getMonth() + 1)).slice(-2);
+  const day = ("0" + d.getDate()).slice(-2);
+  return `${y}-${m}-${day}`;
+}
+</pre>
                     <button onclick="copyGasScript()" class="absolute top-2 right-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 px-2 py-1 rounded text-[10px]">
                         <i class="fa-regular fa-copy"></i> 複製代碼
                     </button>
