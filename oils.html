@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AromaVibe 萃萃森活｜植萃精油選物</title>
+  <meta name="description" content="AromaVibe 萃萃森活，為日常挑一瓶剛剛好的植物香氣。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { --sage:#4f6f52; --sage-2:#739072; --mint:#dfeee5; --ink:#25332a; --muted:#748078; --cream:#f5f2ea; --paper:#fbfaf7; --line:#dde5dc; --white:#fff; --shadow:0 18px 50px rgba(50,72,55,.13); }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--cream); color:var(--ink); font-family:Inter,"Noto Sans TC",sans-serif; }
+    button,input,select { font:inherit; }
+    button { border:0; cursor:pointer; }
+    .container { width:min(1180px,calc(100% - 40px)); margin:auto; }
+    .topbar { position:sticky; top:0; z-index:20; background:rgba(251,250,247,.86); backdrop-filter:blur(16px); border-bottom:1px solid rgba(79,111,82,.12); }
+    .nav { height:76px; display:flex; align-items:center; justify-content:space-between; gap:22px; }
+    .brand { display:flex; align-items:center; gap:11px; color:var(--ink); text-decoration:none; }
+    .brand-mark { width:40px; height:40px; border:1.5px solid var(--sage); border-radius:14px 14px 14px 4px; display:grid; place-items:center; transform:rotate(-5deg); background:var(--mint); }
+    .brand-mark i { color:var(--sage); transform:rotate(5deg); }
+    .brand strong { display:block; font-size:16px; letter-spacing:.05em; }
+    .brand small { display:block; margin-top:2px; color:var(--sage-2); font-size:10px; letter-spacing:.16em; }
+    .nav-actions { display:flex; align-items:center; gap:10px; }
+    .icon-btn { position:relative; width:40px; height:40px; border-radius:13px; background:transparent; color:var(--sage); display:grid; place-items:center; transition:.2s; }
+    .icon-btn:hover { background:var(--mint); }
+    .badge { position:absolute; top:0; right:-2px; min-width:18px; height:18px; padding:0 5px; border-radius:99px; background:var(--sage); color:#fff; font-size:10px; display:grid; place-items:center; }
+    .avatar { width:34px; height:34px; border-radius:50%; background:var(--sage); color:white; display:grid; place-items:center; font-size:12px; font-weight:700; }
+    .login-trigger { display:flex; align-items:center; gap:8px; padding:5px 9px 5px 5px; border-radius:99px; background:transparent; color:var(--ink); font-weight:600; font-size:12px; }
+    .login-trigger:hover { background:var(--mint); }
+    .hero { position:relative; overflow:hidden; padding:78px 0 70px; background:linear-gradient(116deg,#edf5ed 0%,#e4efe6 49%,#f5f2ea 100%); }
+    .hero::after { content:""; position:absolute; width:450px; height:450px; border-radius:50%; right:-140px; top:-220px; border:1px solid rgba(79,111,82,.18); box-shadow:0 0 0 34px rgba(79,111,82,.04),0 0 0 70px rgba(79,111,82,.03); }
+    .hero-grid { position:relative; z-index:1; display:grid; grid-template-columns:1.1fr .9fr; align-items:center; gap:56px; }
+    .kicker { display:inline-flex; align-items:center; gap:7px; color:var(--sage); font-size:11px; letter-spacing:.15em; font-weight:800; }
+    .kicker::before { content:""; width:24px; height:1px; background:var(--sage-2); }
+    h1 { margin:18px 0 16px; max-width:590px; font-size:clamp(35px,5vw,68px); line-height:1.12; letter-spacing:-.045em; font-weight:700; }
+    .hero-copy { color:#68766c; max-width:460px; line-height:1.9; font-size:15px; }
+    .hero-cta { display:flex; gap:11px; margin-top:27px; flex-wrap:wrap; }
+    .btn { min-height:44px; border-radius:14px; padding:0 19px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:700; transition:.2s; }
+    .btn-primary { background:var(--sage); color:#fff; box-shadow:0 8px 18px rgba(79,111,82,.23); }
+    .btn-primary:hover { background:#3d5c42; transform:translateY(-2px); }
+    .btn-soft { background:rgba(255,255,255,.72); color:var(--sage); border:1px solid rgba(79,111,82,.16); }
+    .btn-soft:hover { background:#fff; }
+    .hero-photo { height:360px; border-radius:32px; overflow:hidden; box-shadow:var(--shadow); transform:rotate(2deg); border:10px solid rgba(255,255,255,.5); }
+    .hero-photo img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }
+    .hero-note { position:absolute; right:42px; bottom:20px; padding:11px 13px; background:rgba(255,255,255,.84); backdrop-filter:blur(8px); border-radius:12px; font-size:11px; color:var(--sage); box-shadow:0 8px 20px rgba(47,66,51,.1); }
+    .section { padding:58px 0; }
+    .section-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:25px; }
+    .section-head h2 { margin:8px 0 0; font-size:28px; letter-spacing:-.03em; }
+    .section-head p { margin:0; color:var(--muted); font-size:13px; }
+    .controls { padding:18px 20px; margin-bottom:28px; background:rgba(255,255,255,.62); border:1px solid var(--line); border-radius:20px; }
+    .control-row { display:flex; align-items:center; gap:10px; overflow:auto; scrollbar-width:none; }
+    .control-row + .control-row { margin-top:13px; }
+    .control-label { flex:0 0 52px; color:var(--sage-2); font-size:11px; font-weight:800; }
+    .filter { flex:0 0 auto; padding:8px 14px; border-radius:99px; background:transparent; color:#728076; font-size:12px; white-space:nowrap; }
+    .filter:hover { color:var(--sage); background:var(--mint); }
+    .filter.active { background:var(--sage); color:#fff; }
+    .search-field { width:250px; margin-left:auto; display:flex; align-items:center; gap:8px; padding:9px 12px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+    .search-field input { width:100%; border:0; outline:0; background:transparent; color:var(--ink); font-size:12px; }
+    .search-field input::placeholder { color:#a0aaa1; }
+    .product-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:17px; }
+    .product-card { overflow:hidden; border:1px solid var(--line); border-radius:22px; background:var(--paper); transition:.22s; }
+    .product-card:hover { transform:translateY(-5px); box-shadow:var(--shadow); }
+    .product-image { position:relative; height:220px; overflow:hidden; background:#dbe8dc; }
+    .product-image img { width:100%; height:100%; display:block; object-fit:cover; transition:transform .4s; }
+    .product-card:hover .product-image img { transform:scale(1.06); }
+    .chip { position:absolute; top:13px; left:13px; padding:5px 9px; border-radius:99px; background:rgba(255,255,255,.88); color:var(--sage); font-size:10px; font-weight:700; }
+    .product-body { padding:15px 16px 16px; }
+    .product-top { display:flex; justify-content:space-between; gap:9px; align-items:start; }
+    .product-name { margin:0; font-size:16px; letter-spacing:.01em; }
+    .product-latin { margin:4px 0 0; color:#849087; font-size:10px; font-style:italic; }
+    .price { color:var(--sage); font-size:16px; font-weight:800; white-space:nowrap; }
+    .product-meta { display:flex; gap:7px; margin:14px 0 17px; color:#829087; font-size:11px; }
+    .product-meta span { padding-right:8px; border-right:1px solid var(--line); }
+    .product-actions { display:grid; grid-template-columns:1fr 1.2fr; gap:8px; }
+    .mini-btn { height:36px; border-radius:10px; color:var(--sage); background:var(--mint); font-size:11px; font-weight:700; }
+    .mini-btn.dark { background:var(--sage); color:#fff; }
+    .mini-btn:hover { filter:brightness(.96); }
+    .ritual { padding:50px 0 64px; background:var(--sage); color:#fff; }
+    .ritual-grid { display:grid; grid-template-columns:1.1fr 1fr; gap:60px; align-items:center; }
+    .ritual h2 { margin:10px 0 12px; font-size:32px; letter-spacing:-.04em; }
+    .ritual p { max-width:440px; color:#d9e7da; font-size:14px; line-height:1.9; }
+    .ritual-list { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .ritual-item { padding:18px 13px; border:1px solid rgba(255,255,255,.2); border-radius:18px; background:rgba(255,255,255,.08); }
+    .ritual-item i { margin-bottom:20px; color:#d8ebd9; }
+    .ritual-item strong { display:block; font-size:13px; }
+    .ritual-item small { display:block; margin-top:6px; color:#c9dfcc; font-size:10px; line-height:1.6; }
+    footer { padding:30px 0; background:#344f39; color:#c9ddcb; font-size:11px; }
+    .footer-inner { display:flex; justify-content:space-between; gap:20px; align-items:center; }
+    .footer-inner span { opacity:.8; }
+    .overlay { position:fixed; inset:0; z-index:50; display:none; background:rgba(27,42,31,.45); backdrop-filter:blur(6px); }
+    .overlay.open { display:block; }
+    .modal { width:min(560px,calc(100% - 32px)); max-height:calc(100vh - 32px); overflow:auto; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); padding:26px; border-radius:25px; background:var(--paper); box-shadow:0 30px 80px rgba(19,39,24,.28); }
+    .modal-head { display:flex; justify-content:space-between; align-items:start; gap:18px; margin-bottom:21px; }
+    .modal-head h3 { margin:6px 0 0; font-size:23px; }
+    .close { width:32px; height:32px; border-radius:10px; background:var(--cream); color:var(--sage); display:grid; place-items:center; }
+    .detail-grid { display:grid; grid-template-columns:190px 1fr; gap:20px; }
+    .detail-photo { width:190px; height:220px; border-radius:17px; overflow:hidden; }
+    .detail-photo img { width:100%; height:100%; object-fit:cover; }
+    .detail-copy h4 { margin:0; font-size:20px; }
+    .detail-copy p { color:var(--muted); font-size:12px; line-height:1.75; }
+    .detail-copy .price { font-size:20px; }
+    .detail-section { padding:16px 0 0; margin-top:14px; border-top:1px solid var(--line); }
+    .detail-section strong { display:block; margin-bottom:8px; color:var(--sage); font-size:11px; letter-spacing:.04em; }
+    .notes { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+    .notes span { padding:8px; border-radius:10px; background:var(--mint); color:var(--sage); font-size:11px; text-align:center; }
+    .quantity { display:flex; align-items:center; gap:12px; }
+    .qty-control { display:inline-flex; align-items:center; gap:13px; padding:4px; border:1px solid var(--line); border-radius:11px; background:#fff; }
+    .qty-control button { width:27px; height:27px; border-radius:8px; background:var(--cream); color:var(--sage); }
+    .qty-control span { min-width:15px; text-align:center; font-weight:700; font-size:13px; }
+    .drawer { position:fixed; z-index:60; top:0; right:0; width:min(420px,100%); height:100%; padding:25px 23px; background:var(--paper); box-shadow:-18px 0 55px rgba(19,39,24,.15); transform:translateX(105%); transition:.28s ease; display:flex; flex-direction:column; }
+    .drawer.open { transform:translateX(0); }
+    .drawer-head { display:flex; justify-content:space-between; align-items:center; padding-bottom:18px; border-bottom:1px solid var(--line); }
+    .drawer-head h3 { margin:0; font-size:21px; }
+    .cart-items { flex:1; overflow:auto; padding:15px 0; }
+    .cart-item { display:grid; grid-template-columns:65px 1fr auto; align-items:center; gap:11px; padding:12px 0; border-bottom:1px solid #e7ece6; }
+    .cart-item img { width:65px; height:65px; border-radius:13px; object-fit:cover; }
+    .cart-item strong { display:block; font-size:12px; }
+    .cart-item small { display:block; margin:4px 0 8px; color:var(--muted); font-size:10px; }
+    .cart-item .qty-control { gap:7px; padding:2px; }
+    .cart-item .qty-control button { width:23px; height:23px; }
+    .cart-item .qty-control span { font-size:11px; }
+    .remove { margin-top:7px; color:#a17a7a; background:transparent; font-size:10px; }
+    .cart-summary { padding-top:15px; border-top:1px solid var(--line); }
+    .sum-line { display:flex; justify-content:space-between; margin-bottom:13px; color:var(--muted); font-size:12px; }
+    .sum-line.total { color:var(--ink); font-size:17px; font-weight:800; }
+    .empty-cart { padding:60px 0; color:var(--muted); text-align:center; font-size:13px; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .field { display:flex; flex-direction:column; gap:6px; }
+    .field.full { grid-column:1/-1; }
+    .field label { color:var(--sage); font-size:11px; font-weight:700; }
+    .field input,.field select { width:100%; height:42px; border:1px solid var(--line); border-radius:11px; outline:0; background:#fff; padding:0 12px; color:var(--ink); font-size:12px; }
+    .field input:focus,.field select:focus { border-color:var(--sage-2); box-shadow:0 0 0 3px rgba(115,144,114,.14); }
+    .success { text-align:center; }
+    .success-icon { width:56px; height:56px; margin:0 auto 13px; border-radius:50%; display:grid; place-items:center; background:var(--mint); color:var(--sage); }
+    .order-number { display:inline-block; margin:8px 0 20px; padding:8px 12px; border-radius:8px; background:var(--mint); color:var(--sage); font-size:12px; font-weight:800; letter-spacing:.08em; }
+    .receipt { margin:15px 0; padding:13px; border-radius:13px; background:#f1f5ef; text-align:left; color:#637269; font-size:11px; line-height:1.8; white-space:pre-line; }
+    .toast { position:fixed; z-index:100; left:50%; bottom:25px; transform:translate(-50%,20px); opacity:0; pointer-events:none; padding:12px 17px; border-radius:99px; background:var(--ink); color:#fff; box-shadow:0 9px 25px rgba(20,35,22,.2); font-size:12px; transition:.25s; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    @media(max-width:930px) { .product-grid { grid-template-columns:repeat(3,1fr); } .hero-grid { gap:28px; } }
+    @media(max-width:700px) { .container { width:min(100% - 28px,550px); } .nav { height:68px; } .brand small { display:none; } .login-trigger span { display:none; } .hero { padding:48px 0 38px; } .hero-grid,.ritual-grid { grid-template-columns:1fr; } .hero-photo { height:260px; transform:none; } .hero-note { right:14px; bottom:14px; } .section { padding:42px 0; } .section-head { display:block; } .section-head p { margin-top:7px; } .controls { padding:14px; } .search-field { width:100%; margin:12px 0 0; } .product-grid { grid-template-columns:repeat(2,1fr); gap:12px; } .product-image { height:175px; } .product-body { padding:12px; } .product-name { font-size:14px; } .product-actions { grid-template-columns:1fr; } .ritual-list { grid-template-columns:1fr; } .ritual h2 { font-size:27px; } .detail-grid { grid-template-columns:1fr; } .detail-photo { width:100%; height:210px; } .form-grid { grid-template-columns:1fr; } .field.full { grid-column:auto; } .footer-inner { display:block; line-height:1.8; } }
+    @media(max-width:420px) { .product-grid { grid-template-columns:1fr; } .product-image { height:220px; } }
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="container nav">
+    <a class="brand" href="#top"><span class="brand-mark"><i data-lucide="leaf" size="20"></i></span><span><strong>AromaVibe 萃萃森活</strong><small>BOTANICAL DAILY RITUAL</small></span></a>
+    <div class="nav-actions"><button class="icon-btn" id="cartBtn" aria-label="開啟購物車"><i data-lucide="shopping-bag" size="18"></i><span class="badge" id="cartBadge">0</span></button><button class="login-trigger" id="loginBtn"><span class="avatar" id="avatar">訪</span><span id="userName">登入 / 註冊</span></button></div>
+  </div></header>
+
+  <main id="top">
+    <section class="hero"><div class="container hero-grid"><div><span class="kicker">THE BOTANICAL EDIT</span><h1>讓每一天，<br><em>都有一口深呼吸。</em></h1><p class="hero-copy">從一滴純粹植物精油開始，為睡前、工作與回家後的片刻，找到屬於你的香氣節奏。</p><div class="hero-cta"><a class="btn btn-primary" href="#shop">探索本月香氣 <i data-lucide="arrow-down-right" size="16"></i></a><button class="btn btn-soft" id="heroCartBtn"><i data-lucide="sparkles" size="15"></i> 本月人氣禮盒</button></div></div><div class="hero-photo"><img src="https://images.unsplash.com/photo-1676852148076-7a92002419f3?auto=format&fit=crop&q=85&w=1200" alt="薰衣草精油與植物"></div><div class="hero-note">100% 植物來源 ・ 小批次蒸餾</div></div></section>
+
+    <section class="section" id="shop"><div class="container"><div class="section-head"><div><span class="kicker">SHOP BY MOOD</span><h2>挑一瓶，貼近今天的你</h2></div><p id="resultCount">共 8 款植萃選物</p></div>
+      <div class="controls"><div class="control-row"><span class="control-label">功效</span><div id="benefitFilters"></div></div><div class="control-row"><span class="control-label">情境</span><div id="sceneFilters"></div></div><div class="search-field"><i data-lucide="search" size="16"></i><input id="searchInput" type="search" placeholder="搜尋品名、香調或功效…"></div></div>
+      <div class="product-grid" id="productGrid"></div>
+    </div></section>
+
+    <section class="ritual"><div class="container ritual-grid"><div><span class="kicker" style="color:#d9ebdb">A LITTLE RITUAL</span><h2>把香氣，留給值得的日常。</h2><p>我們相信芳療不必複雜。選一支你喜歡的香氣，滴入擴香儀，讓植物替生活留一個溫柔的留白。</p></div><div class="ritual-list"><div class="ritual-item"><i data-lucide="moon" size="20"></i><strong>睡前沉靜</strong><small>薰衣草・乳香・雪松</small></div><div class="ritual-item"><i data-lucide="sun" size="20"></i><strong>晨間提神</strong><small>檸檬・迷迭香・薄荷</small></div><div class="ritual-item"><i data-lucide="wind" size="20"></i><strong>呼吸淨化</strong><small>尤加利・茶樹・松針</small></div></div></div></section>
+  </main>
+  <footer><div class="container footer-inner"><span>© 2025 AromaVibe 萃萃森活 · A prototype for mindful living</span><span>純植物萃取 ・ 台灣選物</span></div></footer>
+
+  <div class="overlay" id="detailOverlay"><div class="modal"><div class="modal-head"><div><span class="kicker">BOTANICAL NOTE</span><h3>商品詳情</h3></div><button class="close" data-close="detailOverlay" aria-label="關閉"><i data-lucide="x" size="17"></i></button></div><div id="detailContent"></div></div></div>
+  <div class="overlay" id="loginOverlay"><div class="modal" style="max-width:390px"><div class="modal-head"><div><span class="kicker">WELCOME HOME</span><h3>登入 AromaVibe</h3></div><button class="close" data-close="loginOverlay" aria-label="關閉"><i data-lucide="x" size="17"></i></button></div><p style="color:var(--muted);font-size:13px;line-height:1.8">模擬 Google 一鍵登入，登入後可保留你的購物偏好與香氣清單。</p><button class="btn btn-primary" id="googleLogin" style="width:100%;margin-top:13px"><span style="font-weight:800;font-size:16px">G</span> 使用 Google 登入</button><button class="btn btn-soft" id="logoutBtn" style="width:100%;margin-top:9px;display:none">登出目前帳號</button></div></div>
+  <aside class="drawer" id="cartDrawer"><div class="drawer-head"><div><span class="kicker">YOUR SELECTION</span><h3>購物袋</h3></div><button class="close" id="closeCart" aria-label="關閉購物車"><i data-lucide="x" size="17"></i></button></div><div class="cart-items" id="cartItems"></div><div class="cart-summary" id="cartSummary"></div></aside>
+  <div class="overlay" id="checkoutOverlay"><div class="modal"><div class="modal-head"><div><span class="kicker">A GENTLE CHECKOUT</span><h3>完成你的香氣訂單</h3></div><button class="close" data-close="checkoutOverlay" aria-label="關閉"><i data-lucide="x" size="17"></i></button></div><form id="checkoutForm"><div class="form-grid"><div class="field"><label for="recipient">收件姓名</label><input id="recipient" name="recipient" placeholder="例如：林沛瑜" required></div><div class="field"><label for="phone">手機號碼</label><input id="phone" name="phone" inputmode="tel" placeholder="09xx-xxx-xxx" required></div><div class="field full"><label for="address">配送地址</label><input id="address" name="address" placeholder="縣市／區／路段／門牌" required></div><div class="field full"><label for="payment">付款方式</label><select id="payment" name="payment"><option>信用卡（模擬付款）</option><option>LINE Pay（模擬付款）</option><option>貨到付款</option></select></div></div><button class="btn btn-primary" type="submit" style="width:100%;margin-top:22px">確認送出訂單 <i data-lucide="arrow-right" size="16"></i></button></form></div></div>
+  <div class="overlay" id="successOverlay"><div class="modal" style="max-width:480px"><div class="success"><div class="success-icon"><i data-lucide="check" size="27"></i></div><span class="kicker">ORDER RECEIVED</span><h3 style="margin:9px 0 0;font-size:27px">謝謝你，香氣正在準備中</h3><span class="order-number" id="orderNumber"></span><div class="receipt" id="receiptText"></div><div style="display:flex;gap:9px"><button class="btn btn-soft" id="printReceipt" style="flex:1"><i data-lucide="printer" size="15"></i> 列印收據</button><button class="btn btn-primary" id="downloadReceipt" style="flex:1"><i data-lucide="download" size="15"></i> 下載 .txt</button></div><button class="btn" data-close="successOverlay" style="margin-top:12px;width:100%;color:var(--sage)">回到商店</button></div></div></div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const imageBase = 'https://images.unsplash.com/';
+    const products = [
+      {id:'lavender',name:'夜光薰衣草',latin:'Lavandula angustifolia',price:680,size:'10 ml',benefit:'助眠放鬆',scene:'臥房沉靜',tag:'人氣首選',image:imageBase+'photo-1743620398937-e88aacb37be3?auto=format&fit=crop&q=85&w=1000',notes:['前調・草本','中調・花香','後調・木質'],ingredients:'乙酸沉香酯、芳樟醇',use:'睡前將 2–3 滴加入擴香儀，或以植物油稀釋後輕撫肩頸。'},
+      {id:'rosemary',name:'清醒迷迭香',latin:'Rosmarinus officinalis',price:620,size:'10 ml',benefit:'專注提神',scene:'辦公提神',tag:'工作日常',image:imageBase+'photo-1636410514403-80cbeeb5dbf6?auto=format&fit=crop&q=85&w=1000',notes:['前調・樟腦','中調・草本','後調・木質'],ingredients:'1,8-桉葉素、樟腦',use:'工作前 1–2 滴擴香，搭配深呼吸，打造清晰專注的工作桌。'},
+      {id:'eucalyptus',name:'森林尤加利',latin:'Eucalyptus globulus',price:580,size:'10 ml',benefit:'呼吸淨化',scene:'居家擴香禮盒',tag:'清新推薦',image:imageBase+'photo-1624454002302-36b824d7bd0a?auto=format&fit=crop&q=85&w=1000',notes:['前調・清涼','中調・樟腦','後調・木質'],ingredients:'1,8-桉葉素、α-蒎烯',use:'於換季或需要清新空氣時擴香 2–3 滴，保持空間流動。'},
+      {id:'citrus',name:'日光甜橙',latin:'Citrus sinensis',price:520,size:'10 ml',benefit:'舒壓安撫',scene:'辦公提神',tag:'微甜果香',image:imageBase+'photo-1587467744543-b92dcc982647?auto=format&fit=crop&q=85&w=1000',notes:['前調・柑橘','中調・果香','後調・溫潤'],ingredients:'檸檬烯、月桂烯',use:'白天擴香 2 滴，或將 1 滴與基底油調和作手部按摩。'},
+      {id:'mint',name:'沁涼薄荷',latin:'Mentha piperita',price:560,size:'10 ml',benefit:'專注提神',scene:'辦公提神',tag:'沁涼一刻',image:imageBase+'photo-1743620404324-360e5506bcf3?auto=format&fit=crop&q=85&w=1000',notes:['前調・薄荷','中調・清涼','後調・草本'],ingredients:'薄荷醇、薄荷酮',use:'午後 1–2 滴擴香；肌膚使用請充分稀釋並避開眼周。'},
+      {id:'tea-tree',name:'純粹茶樹',latin:'Melaleuca alternifolia',price:590,size:'10 ml',benefit:'呼吸淨化',scene:'單方純粹',tag:'單方經典',image:imageBase+'photo-1563804449068-98f751f279bd?auto=format&fit=crop&q=85&w=1000',notes:['前調・藥草','中調・清新','後調・木質'],ingredients:'松油烯-4-醇、γ-松油烯',use:'加入擴香儀淨化空間；肌膚局部使用需低濃度稀釋。'},
+      {id:'cedar',name:'靜謐雪松',latin:'Cedrus atlantica',price:650,size:'10 ml',benefit:'助眠放鬆',scene:'臥房沉靜',tag:'大地木質',image:imageBase+'photo-1676852148076-7a92002419f3?auto=format&fit=crop&q=85&w=1000',notes:['前調・乾燥','中調・木質','後調・琥珀'],ingredients:'β-雪松烯、Atlantone',use:'夜間與薰衣草搭配擴香，營造沉穩、安定的臥房氣息。'},
+      {id:'gift',name:'日常植感禮盒',latin:'Daily Botanical Set',price:1680,size:'3 × 5 ml',benefit:'舒壓安撫',scene:'居家擴香禮盒',tag:'送禮首選',image:imageBase+'photo-1676852148076-7a92002419f3?auto=format&fit=crop&q=85&w=1000',notes:['薰衣草','甜橙','尤加利'],ingredients:'三款人氣單方精油',use:'一盒收藏睡眠、提神、淨化三種日常情境，附香氣小卡。'}
+    ];
+    const benefits=['全部','助眠放鬆','專注提神','呼吸淨化','舒壓安撫'], scenes=['全部','臥房沉靜','辦公提神','居家擴香禮盒','單方純粹'];
+    let state={benefit:'全部',scene:'全部',search:'',cart:JSON.parse(localStorage.getItem('aromavibe-cart')||'{}'),detailId:null,detailQty:1,user:JSON.parse(localStorage.getItem('aromavibe-user')||'null'),lastOrder:null};
+    const $=s=>document.querySelector(s); const money=n=>`NT$ ${n.toLocaleString('zh-TW')}`;
+    function renderFilters(){ $('#benefitFilters').innerHTML=benefits.map(x=>`<button class="filter ${state.benefit===x?'active':''}" data-benefit="${x}">${x}</button>`).join(''); $('#sceneFilters').innerHTML=scenes.map(x=>`<button class="filter ${state.scene===x?'active':''}" data-scene="${x}">${x}</button>`).join(''); }
+    function visible(){ const q=state.search.trim().toLowerCase(); return products.filter(p=>(state.benefit==='全部'||p.benefit===state.benefit)&&(state.scene==='全部'||p.scene===state.scene)&&(!q||[p.name,p.latin,p.benefit,p.scene,p.tag].join(' ').toLowerCase().includes(q))); }
+    function renderProducts(){ const list=visible(); $('#resultCount').textContent=`共 ${list.length} 款植萃選物`; $('#productGrid').innerHTML=list.length?list.map(p=>`<article class="product-card"><div class="product-image"><img src="${p.image}" alt="${p.name}精油"><span class="chip">${p.tag}</span></div><div class="product-body"><div class="product-top"><div><h3 class="product-name">${p.name}</h3><p class="product-latin">${p.latin}</p></div><span class="price">${money(p.price)}</span></div><div class="product-meta"><span>${p.size}</span><span>${p.benefit}</span></div><div class="product-actions"><button class="mini-btn" data-detail="${p.id}">查看詳情</button><button class="mini-btn dark" data-add="${p.id}"><i data-lucide="plus" size="13"></i> 加入購物車</button></div></div></article>`).join(''):`<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">找不到符合條件的香氣，試試看其他關鍵字。</div>`; lucide.createIcons(); }
+    function cartItems(){ return Object.entries(state.cart).map(([id,qty])=>({p:products.find(p=>p.id===id),qty})).filter(x=>x.p&&x.qty>0); }
+    function cartCount(){ return cartItems().reduce((s,x)=>s+x.qty,0); }
+    function renderCart(){ const items=cartItems(); $('#cartBadge').textContent=cartCount(); $('#cartBadge').style.display=cartCount()?'grid':'none'; if(!items.length){ $('#cartItems').innerHTML='<div class="empty-cart"><i data-lucide="wind" size="25"></i><p>購物袋還是空的<br>挑一瓶今天需要的植物香氣吧。</p></div>'; $('#cartSummary').innerHTML=''; lucide.createIcons(); return; } $('#cartItems').innerHTML=items.map(({p,qty})=>`<div class="cart-item"><img src="${p.image}" alt="${p.name}"><div><strong>${p.name}</strong><small>${money(p.price)} ・ ${p.size}</small><div class="qty-control"><button data-cart-minus="${p.id}">−</button><span>${qty}</span><button data-cart-plus="${p.id}">＋</button></div></div><button class="remove" data-remove="${p.id}">刪除</button></div>`).join(''); const total=items.reduce((s,x)=>s+x.p.price*x.qty,0); $('#cartSummary').innerHTML=`<div class="sum-line"><span>商品小計</span><span>${money(total)}</span></div><div class="sum-line"><span>配送</span><span>${total>=1500?'免運':'NT$ 80'}</span></div><div class="sum-line total"><span>總計</span><span>${money(total>=1500?total:total+80)}</span></div><button class="btn btn-primary" id="checkoutBtn" style="width:100%">前往結帳 <i data-lucide="arrow-right" size="15"></i></button>`; lucide.createIcons(); }
+    function persistCart(){ localStorage.setItem('aromavibe-cart',JSON.stringify(state.cart)); renderCart(); }
+    function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(window.toastTimer); window.toastTimer=setTimeout(()=>t.classList.remove('show'),2200); }
+    function openOverlay(id){ $('#'+id).classList.add('open'); }
+    function closeOverlay(id){ $('#'+id).classList.remove('open'); }
+    function addToCart(id,qty=1){ state.cart[id]=(state.cart[id]||0)+qty; persistCart(); toast('已加入購物袋 🌿'); }
+    function openDetail(id){ const p=products.find(x=>x.id===id); state.detailId=id; state.detailQty=1; $('#detailContent').innerHTML=`<div class="detail-grid"><div class="detail-photo"><img src="${p.image}" alt="${p.name}"></div><div class="detail-copy"><h4>${p.name}</h4><p><em>${p.latin}</em></p><span class="price">${money(p.price)}</span><p>${p.benefit} ・ ${p.scene}</p><div class="quantity"><div class="qty-control"><button id="detailMinus">−</button><span id="detailQty">1</span><button id="detailPlus">＋</button></div><button class="btn btn-primary" id="detailAdd" style="flex:1">加入購物車</button></div></div></div><div class="detail-section"><strong>前・中・後香調</strong><div class="notes">${p.notes.map(n=>`<span>${n}</span>`).join('')}</div></div><div class="detail-section"><strong>主要成分功效</strong><p style="margin:0;color:var(--muted);font-size:12px">${p.ingredients}。由芳療師挑選比例，呈現乾淨、平衡的植物氣息。</p></div><div class="detail-section"><strong>芳療師建議用法</strong><p style="margin:0;color:var(--muted);font-size:12px">${p.use}</p></div>`; openOverlay('detailOverlay'); lucide.createIcons(); }
+    function updateUser(){ if(state.user){ $('#avatar').textContent=state.user.initial; $('#userName').textContent=state.user.name; $('#logoutBtn').style.display='flex'; $('#googleLogin').style.display='none'; } else { $('#avatar').textContent='訪'; $('#userName').textContent='登入 / 註冊'; $('#logoutBtn').style.display='none'; $('#googleLogin').style.display='flex'; } }
+    function makeReceipt(order){ const lines=order.items.map(x=>`${x.p.name} × ${x.qty}    ${money(x.p.price*x.qty)}`).join('\n'); return `AromaVibe 萃萃森活\n訂單編號：${order.number}\n下單時間：${order.time}\n\n${lines}\n\n商品小計：${money(order.subtotal)}\n配送：${order.shipping?money(order.shipping):'免運'}\n總計：${money(order.total)}\n付款方式：${order.payment}\n收件人：${order.recipient}\n配送地址：${order.address}\n\n謝謝你，把香氣留給日常。`; }
+    renderFilters(); renderProducts(); renderCart(); updateUser(); lucide.createIcons();
+    document.addEventListener('click',e=>{ const b=e.target.closest('[data-benefit]'); if(b){state.benefit=b.dataset.benefit;renderFilters();renderProducts();} const s=e.target.closest('[data-scene]'); if(s){state.scene=s.dataset.scene;renderFilters();renderProducts();} const d=e.target.closest('[data-detail]'); if(d)openDetail(d.dataset.detail); const a=e.target.closest('[data-add]'); if(a)addToCart(a.dataset.add); const rm=e.target.closest('[data-remove]'); if(rm){delete state.cart[rm.dataset.remove];persistCart();toast('已從購物袋移除');} const plus=e.target.closest('[data-cart-plus]'); if(plus){state.cart[plus.dataset.cartPlus]++;persistCart();} const minus=e.target.closest('[data-cart-minus]'); if(minus){state.cart[minus.dataset.cartMinus]--;persistCart();} const close=e.target.closest('[data-close]'); if(close)closeOverlay(close.dataset.close); });
+    $('#searchInput').addEventListener('input',e=>{state.search=e.target.value;renderProducts();});
+    $('#cartBtn').onclick=()=>{renderCart();$('#cartDrawer').classList.add('open');}; $('#closeCart').onclick=()=>$('#cartDrawer').classList.remove('open'); $('#heroCartBtn').onclick=()=>{addToCart('gift');$('#cartDrawer').classList.add('open');};
+    $('#loginBtn').onclick=()=>{updateUser();openOverlay('loginOverlay');}; $('#googleLogin').onclick=()=>{state.user={name:'沛瑜的香氣清單',initial:'沛'};localStorage.setItem('aromavibe-user',JSON.stringify(state.user));updateUser();closeOverlay('loginOverlay');toast('登入成功，歡迎回來 🌿');}; $('#logoutBtn').onclick=()=>{state.user=null;localStorage.removeItem('aromavibe-user');updateUser();closeOverlay('loginOverlay');toast('已安全登出');};
+    document.addEventListener('click',e=>{ if(e.target.id==='detailMinus'){state.detailQty=Math.max(1,state.detailQty-1);$('#detailQty').textContent=state.detailQty;} if(e.target.id==='detailPlus'){state.detailQty++;$('#detailQty').textContent=state.detailQty;} if(e.target.id==='detailAdd'){addToCart(state.detailId,state.detailQty);closeOverlay('detailOverlay');} if(e.target.id==='checkoutBtn'){if(cartCount()){closeOverlay('checkoutOverlay');openOverlay('checkoutOverlay');}} });
+    $('#checkoutForm').onsubmit=e=>{e.preventDefault(); const form=new FormData(e.currentTarget),items=cartItems(),subtotal=items.reduce((s,x)=>s+x.p.price*x.qty,0),shipping=subtotal>=1500?0:80; state.lastOrder={number:'AV'+Date.now().toString().slice(-8),time:new Date().toLocaleString('zh-TW'),items,subtotal,shipping,total:subtotal+shipping,payment:form.get('payment'),recipient:form.get('recipient'),address:form.get('address')}; $('#orderNumber').textContent=state.lastOrder.number;$('#receiptText').textContent=makeReceipt(state.lastOrder);state.cart={};persistCart();closeOverlay('checkoutOverlay');openOverlay('successOverlay');e.currentTarget.reset();};
+    $('#downloadReceipt').onclick=()=>{const blob=new Blob([makeReceipt(state.lastOrder)],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`AromaVibe-${state.lastOrder.number}.txt`;a.click();URL.revokeObjectURL(url);toast('收據已下載');}; $('#printReceipt').onclick=()=>window.print();
+    document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+  </script>
+</body>
+</html>
