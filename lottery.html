@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聖誕禮物來了！</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky1:#c7e4ff; --sky2:#eef7ff;
+    --gold:#ffd54f; --gold-deep:#f0ac1a;
+    --mint:#8fe3c6; --mint-deep:#3fbf95;
+    --red:#ff9a9a; --red-deep:#e86464;
+    --pink:#ffc2cf; --lav:#c9b8ff; --peach:#ffcf9e;
+    --cream:#fffaf0; --ink:#5a4636; --ink-soft:#8a7562;
+    --white:#ffffff;
+    --shadow: 0 8px 0 rgba(90,70,54,.12), 0 14px 30px rgba(90,70,54,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Zen Maru Gothic","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 62%,#f7fbff 62%,#e9f4fb 100%);
+    overflow-x:hidden; min-height:100vh;
+  }
+
+  /* ---------- 背景：雲、雪、雪地、聖誕老人雪橇 ---------- */
+  .scene{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .cloud{position:absolute;background:#fff;border-radius:999px;opacity:.95;filter:drop-shadow(0 6px 0 rgba(160,200,230,.35))}
+  .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+  .cloud.c1{top:9vh;width:150px;height:46px;animation:drift 38s linear infinite}
+  .cloud.c1::before{width:70px;height:70px;left:22px;top:-34px}.cloud.c1::after{width:52px;height:52px;left:78px;top:-22px}
+  .cloud.c2{top:26vh;width:110px;height:36px;animation:drift 52s linear infinite -20s}
+  .cloud.c2::before{width:52px;height:52px;left:16px;top:-26px}.cloud.c2::after{width:40px;height:40px;left:56px;top:-16px}
+  .cloud.c3{top:4vh;width:90px;height:30px;animation:drift 44s linear infinite -30s}
+  .cloud.c3::before{width:42px;height:42px;left:14px;top:-20px}.cloud.c3::after{width:32px;height:32px;left:44px;top:-12px}
+  .cloud.c4{top:40vh;width:130px;height:40px;animation:drift 60s linear infinite -8s;opacity:.8}
+  .cloud.c4::before{width:60px;height:60px;left:20px;top:-30px}.cloud.c4::after{width:44px;height:44px;left:70px;top:-18px}
+  @keyframes drift{from{transform:translateX(-220px)}to{transform:translateX(110vw)}}
+
+  .hill{position:absolute;bottom:-12vh;border-radius:50%;background:#ffffff;box-shadow:inset 0 14px 0 rgba(200,225,245,.55)}
+  .hill.h1{left:-10vw;width:60vw;height:34vh}
+  .hill.h2{right:-14vw;width:70vw;height:40vh;background:#f3f9ff}
+  .deco{position:absolute;bottom:4vh;font-size:34px;animation:sway 3s ease-in-out infinite;transform-origin:bottom center}
+  @keyframes sway{50%{transform:rotate(6deg)}}
+
+  .flake{position:absolute;top:-6vh;color:#fff;text-shadow:0 0 6px rgba(150,190,230,.8);animation:snow linear infinite}
+  @keyframes snow{to{transform:translate(var(--sx),112vh) rotate(360deg)}}
+
+  .sleigh{position:absolute;top:13vh;left:0;width:300px;animation:fly 24s linear infinite;animation-delay:-4s}
+  .sleigh .bob{animation:bob 1.6s ease-in-out infinite}
+  .sleigh svg{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 0 rgba(90,70,54,.12))}
+  .sleigh .leg{animation:gallop .5s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:top center}
+  .sleigh .leg.b{animation-delay:-.25s}
+  .sleigh .spark{animation:twinkle 1s ease-in-out infinite}
+  @keyframes fly{
+    0%{transform:translate(-340px,0) rotate(-4deg)}
+    50%{transform:translate(50vw,-4vh) rotate(-2deg)}
+    100%{transform:translate(110vw,2vh) rotate(-5deg)}
+  }
+  @keyframes bob{50%{transform:translateY(-12px)}}
+  @keyframes gallop{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+  @keyframes twinkle{50%{opacity:.2;transform:scale(.6)}}
+  @media (max-width:820px){.sleigh{width:210px;top:16vh}}
+
+  /* ---------- 頂部 ---------- */
+  .topbar{position:relative;z-index:5;display:flex;align-items:center;justify-content:center;padding:20px 16px 8px}
+  .title{position:relative;background:var(--white);padding:12px 32px 16px;border-radius:999px;box-shadow:var(--shadow);
+    font-weight:900;font-size:clamp(24px,3.8vw,42px);letter-spacing:.08em;display:flex;align-items:center;gap:12px;text-align:center;
+    border:5px solid var(--red)}
+  .title .t-red{color:var(--red-deep)} .title .t-green{color:var(--mint-deep)}
+  .lights{position:absolute;left:24px;right:24px;bottom:-14px;display:flex;justify-content:space-between}
+  .lights::before{content:"";position:absolute;left:0;right:0;top:4px;height:3px;background:#5b8a6d;border-radius:3px;z-index:-1}
+  .lights i{width:13px;height:17px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;animation:blink 1.4s ease-in-out infinite}
+  .lights i:nth-child(4n+1){background:#ff6b6b}.lights i:nth-child(4n+2){background:#ffd54f;animation-delay:-.35s}
+  .lights i:nth-child(4n+3){background:#5fd3a8;animation-delay:-.7s}.lights i:nth-child(4n){background:#7fb8ff;animation-delay:-1.05s}
+  @keyframes blink{50%{opacity:.35;transform:scale(.85)}}
+
+  .round-btn{border:none;cursor:pointer;font-family:inherit;font-weight:700;color:var(--ink);
+    background:var(--white);border-radius:999px;padding:10px 16px;font-size:16px;box-shadow:var(--shadow);transition:transform .15s}
+  .round-btn:hover{transform:translateY(-2px)} .round-btn:active{transform:translateY(2px)}
+  .round-btn.off{background:#eee5da;color:var(--ink-soft)}
+  .sound-btn{position:fixed;left:16px;bottom:26px;z-index:30}
+
+  .batch-pill{position:relative;z-index:5;margin:18px auto 0;width:max-content;max-width:calc(100% - 32px);
+    background:var(--gold);padding:6px 20px;border-radius:999px;font-weight:900;font-size:clamp(15px,2vw,20px);
+    box-shadow:0 5px 0 var(--gold-deep);text-align:center}
+
+  /* ---------- 主舞台 ---------- */
+  main{position:relative;z-index:5;display:grid;grid-template-columns:minmax(260px,420px) minmax(280px,560px);
+    gap:clamp(20px,4vw,56px);justify-content:center;align-items:center;padding:20px 16px 150px}
+  @media (max-width:820px){main{grid-template-columns:1fr;justify-items:center;padding-bottom:200px}.controls{padding-bottom:78px !important}}
+
+  .machine{position:relative;width:min(400px,86vw);display:flex;flex-direction:column;align-items:center}
+  .bow{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:52px;z-index:3;filter:drop-shadow(0 4px 0 rgba(90,70,54,.15))}
+  .dome{position:relative;width:100%;aspect-ratio:1;border-radius:50%;
+    background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.95) 0 9%,rgba(255,255,255,.35) 18%,rgba(220,245,255,.45) 55%,rgba(170,220,250,.55) 100%);
+    border:10px solid #fff;box-shadow:inset 0 -18px 30px rgba(120,180,220,.35),0 10px 0 rgba(90,70,54,.12),0 0 0 6px var(--red);overflow:hidden}
+  .dome.spinning{animation:wobble .35s ease-in-out infinite}
+  @keyframes wobble{25%{transform:rotate(-1.4deg)}75%{transform:rotate(1.4deg)}}
+  .ball{position:absolute;width:13%;aspect-ratio:1;border-radius:50%;left:0;top:0;
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(9px,1.3vw,13px);color:var(--ink);
+    box-shadow:inset -4px -5px 0 rgba(0,0,0,.08),inset 4px 4px 0 rgba(255,255,255,.6);will-change:transform}
+  .base{position:relative;width:62%;height:86px;margin-top:-18px;background:var(--red);border-radius:26px 26px 34px 34px;
+    box-shadow:0 8px 0 var(--red-deep);display:flex;align-items:center;justify-content:center;z-index:2;
+    background-image:repeating-linear-gradient(90deg,transparent 0 22px,rgba(255,255,255,.35) 22px 30px)}
+  .chute{width:96px;height:46px;border-radius:0 0 50px 50px;background:#fff;box-shadow:inset 0 8px 0 rgba(90,70,54,.1);
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink-soft);font-weight:700}
+  .handle{position:absolute;right:-30px;top:16px;width:36px;height:36px;border-radius:50%;background:var(--gold);box-shadow:0 5px 0 var(--gold-deep)}
+  .handle::before{content:"";position:absolute;left:-18px;top:12px;width:22px;height:12px;background:var(--gold-deep);border-radius:6px}
+  .base.spinning .handle{animation:crank .5s linear infinite}
+  @keyframes crank{to{transform:rotate(360deg)}}
+  .legs{display:flex;gap:44%;width:58%;justify-content:center}
+  .legs i{display:block;width:22px;height:26px;background:var(--mint);border-radius:0 0 12px 12px}
+
+  /* 結果區 */
+  .stage{width:100%;display:flex;flex-direction:column;align-items:center}
+  .reveal{position:relative;width:100%;min-height:360px;background:var(--cream);border-radius:40px;box-shadow:var(--shadow);
+    border:6px dashed #ffc9c9;padding:24px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+  .reveal::before{content:"🎄";position:absolute;top:-22px;left:22px;font-size:40px}
+  .reveal::after{content:"🎁";position:absolute;bottom:-18px;right:22px;font-size:40px}
+  .slot{font-size:15px;font-weight:700;color:var(--ink-soft);background:#fff;border-radius:999px;padding:4px 16px}
+
+  .winners{width:100%;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:clamp(12px,2vw,22px);
+    max-height:360px;overflow-y:auto;padding:12px 6px 18px;
+    --bs:clamp(140px,22vw,190px); --fs:clamp(34px,5.4vw,56px)}
+  .winners.n2{--bs:clamp(108px,15vw,146px); --fs:clamp(24px,3.4vw,38px)}
+  .winners.n3{--bs:clamp(86px,11vw,116px);  --fs:clamp(20px,2.7vw,30px)}
+  .winners.many{--bs:clamp(70px,8.5vw,90px); --fs:clamp(17px,2.1vw,22px)}
+  .card{display:flex;flex-direction:column;align-items:center;gap:12px;min-width:calc(var(--bs) + 10px)}
+  .gball{width:var(--bs);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:calc(var(--bs) * .4);font-weight:900;color:var(--ink);position:relative;
+    background:radial-gradient(circle at 35% 30%,#fff 0 12%,#e7e1ff 45%,var(--lav));
+    box-shadow:inset -8px -10px 0 rgba(0,0,0,.08),0 8px 0 rgba(90,70,54,.12)}
+  .gball::after{content:"";position:absolute;inset:16%;border-radius:50%;background:rgba(255,255,255,.85)}
+  .gball span{position:relative;z-index:1}
+  .gball.rolling span{animation:jitter .12s steps(2) infinite}
+  @keyframes jitter{50%{transform:translateY(-3px)}}
+  .gball.pop{animation:pop .7s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{0%{transform:translateY(-110px) scale(.4)}60%{transform:translateY(0) scale(1.12)}100%{transform:scale(1)}}
+  .nm{font-size:var(--fs);font-weight:900;letter-spacing:.06em;min-height:1.35em;line-height:1.35;
+    background:#fff;padding:0 .6em;border-radius:20px;box-shadow:0 5px 0 var(--mint);white-space:nowrap}
+  .nm.empty{background:transparent;box-shadow:none;color:var(--ink-soft);font-size:clamp(16px,2.2vw,22px);letter-spacing:.04em}
+  .nm.show{animation:nameIn .6s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes nameIn{from{transform:scale(.3) rotate(-8deg);opacity:0}to{transform:scale(1);opacity:1}}
+  .congrats{font-size:20px;font-weight:900;color:var(--red-deep);min-height:1.4em}
+
+  /* 捲軸 */
+  .winners::-webkit-scrollbar,.roster-list::-webkit-scrollbar{width:10px}
+  .winners::-webkit-scrollbar-thumb,.roster-list::-webkit-scrollbar-thumb{background:var(--red);border-radius:999px;border:2px solid var(--cream)}
+  .winners::-webkit-scrollbar-track,.roster-list::-webkit-scrollbar-track{background:#f6ecdd;border-radius:999px}
+  .winners,.roster-list{scrollbar-color:var(--red) #f6ecdd;scrollbar-width:thin}
+
+  /* ---------- 控制列 ---------- */
+  .controls{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;
+    padding:16px 16px 22px;background:linear-gradient(0deg,rgba(233,244,251,.96),rgba(233,244,251,0))}
+  .btn{border:none;cursor:pointer;font-family:inherit;font-weight:900;font-size:clamp(18px,2.4vw,24px);color:var(--ink);
+    padding:16px 34px;border-radius:999px;transition:transform .12s,filter .2s,opacity .2s;letter-spacing:.06em}
+  .btn:hover:not(:disabled){transform:translateY(-3px)}
+  .btn:active:not(:disabled){transform:translateY(4px)}
+  .btn-start{background:var(--red);box-shadow:0 8px 0 var(--red-deep);animation:bounce 1.4s ease-in-out infinite}
+  @keyframes bounce{50%{transform:translateY(-6px)}}
+  .btn-next{background:var(--mint);box-shadow:0 8px 0 var(--mint-deep)}
+  .btn-fast{background:#fff;box-shadow:0 8px 0 #e3d6c6;font-size:clamp(16px,2vw,20px)}
+  .btn-fast.on{background:var(--gold);box-shadow:0 8px 0 var(--gold-deep)}
+  .btn:disabled{filter:grayscale(1);opacity:.5;cursor:not-allowed;animation:none}
+  .hidden{display:none !important}
+
+  /* ---------- 得獎名冊（左側） ---------- */
+  .roster-btn{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:25;border:none;cursor:pointer;font-family:inherit;
+    background:var(--peach);color:var(--ink);font-weight:900;font-size:17px;writing-mode:vertical-rl;letter-spacing:.2em;
+    padding:20px 12px;border-radius:0 24px 24px 0;box-shadow:4px 6px 0 rgba(90,70,54,.12);transition:left .45s cubic-bezier(.3,1.2,.4,1)}
+  .roster-btn .count{writing-mode:horizontal-tb;display:inline-block;margin-top:8px;background:#fff;border-radius:999px;padding:2px 8px;font-size:14px;letter-spacing:0}
+  .drawer{position:fixed;top:0;left:0;height:100%;width:min(340px,86vw);z-index:24;background:var(--cream);
+    border-radius:0 36px 36px 0;box-shadow:10px 0 30px rgba(90,70,54,.18);transform:translateX(-105%);
+    transition:transform .45s cubic-bezier(.3,1.2,.4,1);display:flex;flex-direction:column;padding:24px 14px 20px 18px}
+  .drawer.open{transform:translateX(0)}
+  body.drawer-open .roster-btn{left:min(340px,86vw)}
+  .drawer h2{font-size:24px;font-weight:900;display:flex;justify-content:space-between;align-items:center}
+  .drawer .sum{font-size:14px;color:var(--ink-soft);font-weight:700;margin:4px 0 12px}
+  .close-x{border:none;background:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;box-shadow:0 4px 0 #eadfce;font-family:inherit;color:var(--ink)}
+  .roster-list{list-style:none;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:4px 6px 20px 2px}
+  .roster-list li{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:8px 12px;box-shadow:0 4px 0 #f1e6d6;animation:nameIn .5s ease;flex:none}
+  .roster-list li.grp{background:transparent;box-shadow:none;padding:8px 4px 0;font-weight:900;color:var(--red-deep);font-size:15px}
+  .r-ball{flex:none;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;
+    box-shadow:inset -3px -4px 0 rgba(0,0,0,.08)}
+  .r-name{font-weight:900;font-size:19px}
+  .roster-empty{color:var(--ink-soft);text-align:center;margin-top:40px;line-height:1.8}
+
+  /* ---------- 結束彈窗 ---------- */
+  .modal-bg{position:fixed;inset:0;z-index:50;background:rgba(90,70,54,.35);display:flex;align-items:center;justify-content:center;padding:16px;
+    opacity:0;pointer-events:none;transition:opacity .4s}
+  .modal-bg.show{opacity:1;pointer-events:auto}
+  .modal{background:var(--cream);border-radius:48px;padding:36px 28px 30px;width:min(520px,100%);text-align:center;
+    border:8px solid #fff;box-shadow:0 0 0 8px var(--red),0 20px 50px rgba(90,70,54,.3);transform:scale(.6);transition:transform .5s cubic-bezier(.2,1.6,.4,1)}
+  .modal-bg.show .modal{transform:scale(1)}
+  .modal .emoji{font-size:64px;animation:bounce 1.2s ease-in-out infinite}
+  .modal h3{font-size:clamp(24px,4vw,32px);font-weight:900;margin:8px 0 6px;line-height:1.4}
+  .modal p{color:var(--ink-soft);font-weight:700}
+  .modal-close{margin-top:20px;border:none;cursor:pointer;font-family:inherit;font-weight:900;font-size:16px;background:#fff;border-radius:999px;padding:10px 22px;box-shadow:0 5px 0 #eadfce;color:var(--ink)}
+
+  .confetti{position:fixed;top:-20px;z-index:40;pointer-events:none;border-radius:3px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--rot))}}
+
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important}}
+</style>
+</head>
+<body>
+
+<div class="scene" id="scene" aria-hidden="true">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div>
+
+  <!-- 聖誕老人麋鹿飛車 -->
+  <div class="sleigh"><div class="bob">
+    <svg viewBox="0 0 330 120" xmlns="http://www.w3.org/2000/svg">
+      <!-- 星光尾巴 -->
+      <g fill="#ffd54f">
+        <path class="spark" d="M8 70l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/>
+        <path class="spark" style="animation-delay:-.4s" d="M30 96l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>
+        <path class="spark" style="animation-delay:-.7s" d="M22 46l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/>
+      </g>
+      <!-- 韁繩 -->
+      <path d="M130 66 Q175 58 205 66 Q245 58 280 64" fill="none" stroke="#f0ac1a" stroke-width="3"/>
+      <!-- 雪橇 -->
+      <path d="M44 100 H138 Q152 100 150 86" fill="none" stroke="#f0ac1a" stroke-width="5" stroke-linecap="round"/>
+      <path d="M60 92 V100 M122 92 V100" stroke="#f0ac1a" stroke-width="4"/>
+      <!-- 禮物袋 -->
+      <circle cx="66" cy="50" r="18" fill="#7fd6b0"/>
+      <path d="M58 33 Q66 26 74 33" fill="none" stroke="#3fbf95" stroke-width="4"/>
+      <!-- 聖誕老人 -->
+      <circle cx="100" cy="54" r="17" fill="#ff7b7b"/>
+      <circle cx="100" cy="32" r="11" fill="#ffd9b8"/>
+      <path d="M89 34 Q100 52 111 34 Q106 40 100 40 Q94 40 89 34z" fill="#fff"/>
+      <circle cx="96" cy="30" r="1.6" fill="#5a4636"/><circle cx="104" cy="30" r="1.6" fill="#5a4636"/>
+      <circle cx="100" cy="34" r="2" fill="#ff9a9a"/>
+      <path d="M88 24 Q100 4 116 12 L111 24z" fill="#ff7b7b"/>
+      <rect x="86" y="21" width="27" height="6" rx="3" fill="#fff"/>
+      <circle cx="117" cy="12" r="4.5" fill="#fff"/>
+      <path d="M112 50 Q124 46 132 58" fill="none" stroke="#ff7b7b" stroke-width="7" stroke-linecap="round"/>
+      <path d="M40 60 Q40 94 62 94 H130 Q146 94 146 76 L134 62 H52z" fill="#ff7b7b"/>
+      <path d="M48 68 H138" stroke="#ffd54f" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="70" cy="80" r="4" fill="#fff"/><circle cx="92" cy="80" r="4" fill="#fff"/><circle cx="114" cy="80" r="4" fill="#fff"/>
+      <!-- 麋鹿 1 -->
+      <g transform="translate(168,40)">
+        <rect class="leg"   x="8"  y="30" width="5" height="20" rx="2.5" fill="#9a6640"/>
+        <rect class="leg b" x="30" y="30" width="5" height="20" rx="2.5" fill="#9a6640"/>
+        <ellipse cx="22" cy="28" rx="22" ry="11" fill="#c58a5a"/>
+        <path d="M38 22 L46 8" stroke="#c58a5a" stroke-width="9" stroke-linecap="round"/>
+        <ellipse cx="50" cy="6" rx="10" ry="8" fill="#c58a5a"/>
+        <path d="M46 0 L42 -12 M44 -6 L38 -8 M52 -1 L56 -12 M55 -7 L61 -9" stroke="#8a5a35" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="52" cy="4" r="1.8" fill="#5a4636"/>
+        <circle cx="60" cy="8" r="4" fill="#ff5c5c"/>
+        <path d="M6 22 Q0 18 2 26" fill="#fff"/>
+      </g>
+      <!-- 麋鹿 2 -->
+      <g transform="translate(244,36)">
+        <rect class="leg b" x="8"  y="30" width="5" height="20" rx="2.5" fill="#9a6640"/>
+        <rect class="leg"   x="30" y="30" width="5" height="20" rx="2.5" fill="#9a6640"/>
+        <ellipse cx="22" cy="28" rx="22" ry="11" fill="#c58a5a"/>
+        <path d="M38 22 L46 8" stroke="#c58a5a" stroke-width="9" stroke-linecap="round"/>
+        <ellipse cx="50" cy="6" rx="10" ry="8" fill="#c58a5a"/>
+        <path d="M46 0 L42 -12 M44 -6 L38 -8 M52 -1 L56 -12 M55 -7 L61 -9" stroke="#8a5a35" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="52" cy="4" r="1.8" fill="#5a4636"/>
+        <circle cx="60" cy="8" r="4.5" fill="#ff3b3b"/>
+        <circle cx="60" cy="8" r="7" fill="#ff3b3b" opacity=".25" class="spark"/>
+      </g>
+    </svg>
+  </div></div>
+
+  <div class="hill h1"></div><div class="hill h2"></div>
+  <span class="deco" style="left:5vw">🎄</span>
+  <span class="deco" style="left:15vw;animation-delay:-1s">⛄</span>
+  <span class="deco" style="right:22vw;animation-delay:-2s">🎁</span>
+  <span class="deco" style="right:9vw;animation-delay:-.5s;font-size:42px">🎄</span>
+</div>
+
+<button class="round-btn sound-btn" id="soundBtn" aria-pressed="true">🔊 音效開</button>
+
+<header class="topbar">
+  <div class="title">
+    <span>🎅</span><span><span class="t-red">聖誕禮物</span><span class="t-green">來了！</span></span><span>🎁</span>
+    <div class="lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+</header>
+<div class="batch-pill" id="batchPill">準備好了嗎？按下「開始抽獎」吧！🔔</div>
+
+<main>
+  <div class="machine">
+    <span class="bow" aria-hidden="true">🎀</span>
+    <div class="dome" id="dome"></div>
+    <div class="base" id="base">
+      <div class="chute">出球口</div>
+      <div class="handle"></div>
+    </div>
+    <div class="legs"><i></i><i></i></div>
+  </div>
+
+  <section class="stage">
+    <div class="reveal">
+      <div class="slot" id="slotText">等待開獎中</div>
+      <div class="winners" id="winnersBox">
+        <div class="card"><div class="gball"><span>?</span></div><div class="nm empty">幸運兒會是誰呢？</div></div>
+      </div>
+      <div class="congrats" id="congrats"></div>
+    </div>
+  </section>
+</main>
+
+<div class="controls">
+  <button class="btn btn-start" id="startBtn">🎄 開始抽獎</button>
+  <button class="btn btn-next hidden" id="nextBtn" disabled>🎯 抽下一位</button>
+  <button class="btn btn-fast" id="fastBtn" aria-pressed="false">⚡ 加速抽：關</button>
+</div>
+
+<button class="roster-btn" id="rosterBtn" aria-controls="drawer" aria-expanded="false">📜 得獎名冊 <span class="count" id="rosterCount">0</span></button>
+<aside class="drawer" id="drawer" aria-label="得獎名冊">
+  <h2>📜 得獎名冊 <button class="close-x" id="closeDrawer" aria-label="收起">✕</button></h2>
+  <div class="sum" id="rosterSum">目前共 0 位得獎</div>
+  <ul class="roster-list" id="rosterList"></ul>
+  <div class="roster-empty" id="rosterEmpty">還沒有人得獎喔～<br>趕快開始抽獎吧！🎄</div>
+</aside>
+
+<div class="modal-bg" id="endModal" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+  <div class="modal">
+    <div class="emoji">🎉🎄</div>
+    <h3 id="endTitle">恭喜所有獲獎者！<br>抽獎圓滿結束</h3>
+    <p>祝大家聖誕快樂、新年快樂 🎅💖</p>
+    <button class="modal-close" id="modalClose">好的，收起來</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* ================= 抽獎名單（依序開出） ================= */
+  const BATCHES = [
+    [{no:15, name:"張曉明"}],
+    [{no:4,  name:"李安"}, {no:5, name:"李寧"}],
+    [{no:35, name:"林聰明"}, {no:36, name:"林可愛"}, {no:37, name:"林漂亮"}]
+  ];
+  const NORMAL_MS = 5000, FAST_MS = 3000;
+  const ROLL_MAX = Math.max(150, ...BATCHES.flat().map(w => w.no));
+  const COLORS = ["#ffd54f","#8fe3c6","#ffb7c9","#c9b8ff","#ffcf9e","#a8dcff","#d6f29b","#ff9a9a"];
+  const colorFor = n => COLORS[n % COLORS.length];
+
+  /* ================= DOM ================= */
+  const $ = id => document.getElementById(id);
+  const dome=$("dome"), base=$("base"), winnersBox=$("winnersBox"), slotText=$("slotText"), congrats=$("congrats"),
+        batchPill=$("batchPill"), startBtn=$("startBtn"), nextBtn=$("nextBtn"), fastBtn=$("fastBtn"), soundBtn=$("soundBtn"),
+        rosterBtn=$("rosterBtn"), drawer=$("drawer"), rosterList=$("rosterList"), rosterEmpty=$("rosterEmpty"),
+        rosterCount=$("rosterCount"), rosterSum=$("rosterSum"), endModal=$("endModal");
+
+  let batchIdx = 0, fast = false, busy = false, lastGroup = -1;
+  const winners = [];
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  /* ================= 飄雪 ================= */
+  const scene=$("scene");
+  for(let i=0;i<46;i++){
+    const f=document.createElement("span"); f.className="flake";
+    f.textContent = i%3===0 ? "❄" : "●";
+    const s = i%3===0 ? 12+Math.random()*14 : 4+Math.random()*6;
+    f.style.cssText=`left:${Math.random()*100}vw;font-size:${s}px;opacity:${.6+Math.random()*.4};
+      animation-duration:${9+Math.random()*12}s;animation-delay:${-Math.random()*20}s;--sx:${(Math.random()-.5)*120}px`;
+    scene.appendChild(f);
+  }
+
+  /* ================= Web Audio 音效 ================= */
+  let actx=null, master=null, soundOn=true, noiseBuf=null;
+  function audio(){
+    if(!actx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      actx = new AC();
+      master = actx.createGain(); master.gain.value=.8; master.connect(actx.destination);
+      noiseBuf = actx.createBuffer(1, actx.sampleRate*3, actx.sampleRate);
+      const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    }
+    if(actx.state==="suspended") actx.resume();
+    return actx;
+  }
+  const noiseSrc = c => { const s=c.createBufferSource(); s.buffer=noiseBuf; return s; };
+
+  // 滾輪攪拌喀噠聲
+  function sfxTick(){
+    if(!soundOn) return; const c=audio(); if(!c) return; const t=c.currentTime;
+    const o=c.createOscillator(), g=c.createGain();
+    o.type="square"; o.frequency.setValueAtTime(1500+Math.random()*700,t); o.frequency.exponentialRampToValueAtTime(400,t+.03);
+    g.gain.setValueAtTime(.06,t); g.gain.exponentialRampToValueAtTime(.0001,t+.04);
+    o.connect(g).connect(master); o.start(t); o.stop(t+.05);
+    const n=noiseSrc(c), f=c.createBiquadFilter(), ng=c.createGain();
+    f.type="bandpass"; f.frequency.value=2500+Math.random()*1500; f.Q.value=3;
+    ng.gain.setValueAtTime(.12,t); ng.gain.exponentialRampToValueAtTime(.0001,t+.025);
+    n.connect(f).connect(ng).connect(master); n.start(t,Math.random()*2,.04);
+  }
+  // 叮咚雙音和弦
+  function sfxDingDong(){
+    if(!soundOn) return; const c=audio(); if(!c) return; const t=c.currentTime;
+    const chord=(time,freqs)=>freqs.forEach((f,i)=>{
+      [["sine",1,.22],["triangle",2,.05]].forEach(([type,mul,vol])=>{
+        const o=c.createOscillator(), g=c.createGain();
+        o.type=type; o.frequency.value=f*mul;
+        g.gain.setValueAtTime(0,time); g.gain.linearRampToValueAtTime(vol/(i+1),time+.01);
+        g.gain.exponentialRampToValueAtTime(.0001,time+1.4);
+        o.connect(g).connect(master); o.start(time); o.stop(time+1.5);
+      });
+    });
+    chord(t,[659.25,830.61]); chord(t+.38,[523.25,659.25]);
+  }
+  // 小鈴鐺（每顆球彈出時）
+  function sfxBell(){
+    if(!soundOn) return; const c=audio(); if(!c) return; const t=c.currentTime;
+    [2093,3136].forEach((f,i)=>{
+      const o=c.createOscillator(), g=c.createGain(); o.type="sine"; o.frequency.value=f+Math.random()*40;
+      g.gain.setValueAtTime(.07/(i+1),t); g.gain.exponentialRampToValueAtTime(.0001,t+.5);
+      o.connect(g).connect(master); o.start(t); o.stop(t+.55);
+    });
+  }
+  // 群眾歡呼 + 拍手 + 雪橇鈴
+  function sfxCheer(){
+    if(!soundOn) return; const c=audio(); if(!c) return; const t=c.currentTime+.2, dur=2.6;
+    [700,1150,1700].forEach((fq,i)=>{
+      const n=noiseSrc(c), f=c.createBiquadFilter(), g=c.createGain(), lfo=c.createOscillator(), lg=c.createGain();
+      f.type="bandpass"; f.frequency.value=fq; f.Q.value=1.2;
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.16-i*.03,t+.35); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      lfo.frequency.value=5+i*2.3; lg.gain.value=.05; lfo.connect(lg).connect(g.gain);
+      n.connect(f).connect(g).connect(master); n.start(t,Math.random(),dur); lfo.start(t); lfo.stop(t+dur);
+    });
+    for(let k=0;k<42;k++){
+      const at=t+Math.random()*(dur-.4);
+      const n=noiseSrc(c), f=c.createBiquadFilter(), g=c.createGain();
+      f.type="highpass"; f.frequency.value=1200+Math.random()*800;
+      g.gain.setValueAtTime(.0001,at); g.gain.linearRampToValueAtTime(.18*Math.random()+.06,at+.003); g.gain.exponentialRampToValueAtTime(.0001,at+.07);
+      n.connect(f).connect(g).connect(master); n.start(at,Math.random()*2,.09);
+    }
+    for(let k=0;k<14;k++){ // 鈴鐺叮叮
+      const at=t+k*.11, o=c.createOscillator(), g=c.createGain();
+      o.type="sine"; o.frequency.value=2600+Math.random()*900;
+      g.gain.setValueAtTime(.0001,at); g.gain.linearRampToValueAtTime(.035,at+.005); g.gain.exponentialRampToValueAtTime(.0001,at+.25);
+      o.connect(g).connect(master); o.start(at); o.stop(at+.3);
+    }
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>{
+      const o=c.createOscillator(), g=c.createGain(), at=t+i*.09;
+      o.type="triangle"; o.frequency.value=f;
+      g.gain.setValueAtTime(0,at); g.gain.linearRampToValueAtTime(.09,at+.01); g.gain.exponentialRampToValueAtTime(.0001,at+.5);
+      o.connect(g).connect(master); o.start(at); o.stop(at+.55);
+    });
+  }
+
+  soundBtn.addEventListener("click",()=>{
+    soundOn=!soundOn;
+    soundBtn.textContent = soundOn ? "🔊 音效開" : "🔇 靜音中";
+    soundBtn.classList.toggle("off",!soundOn);
+    soundBtn.setAttribute("aria-pressed",soundOn);
+    if(soundOn) audio();
+  });
+
+  /* ================= 抽獎機小球物理 ================= */
+  const balls=[];
+  for(let i=0;i<22;i++){
+    const el=document.createElement("div"); el.className="ball";
+    el.textContent=1+Math.floor(Math.random()*ROLL_MAX); el.style.background=COLORS[i%COLORS.length];
+    dome.appendChild(el);
+    balls.push({el,x:.3+Math.random()*.4,y:.5+Math.random()*.3,vx:0,vy:0});
+  }
+  let mixing=false;
+  (function physics(){
+    const R=.5, r=.065;
+    for(const b of balls){
+      b.vy += mixing ? .0009 : .0016;
+      if(mixing && Math.random()<.08){ b.vx+=(Math.random()-.5)*.03; b.vy-=Math.random()*.035; }
+      b.vx*=.985; b.vy*=.985; b.x+=b.vx; b.y+=b.vy;
+      const dx=b.x-R, dy=b.y-R, dist=Math.hypot(dx,dy), lim=R-r-.035;
+      if(dist>lim){ const nx=dx/dist, ny=dy/dist; b.x=R+nx*lim; b.y=R+ny*lim; const dot=b.vx*nx+b.vy*ny; b.vx-=1.7*dot*nx; b.vy-=1.7*dot*ny; }
+    }
+    for(let i=0;i<balls.length;i++)for(let j=i+1;j<balls.length;j++){
+      const a=balls[i], b=balls[j], dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy), m=r*2;
+      if(d>0 && d<m){ const o=(m-d)/2, nx=dx/d, ny=dy/d; a.x-=nx*o; a.y-=ny*o; b.x+=nx*o; b.y+=ny*o; }
+    }
+    const w=dome.clientWidth;
+    for(const b of balls) b.el.style.transform=`translate(${(b.x-r)*w}px,${(b.y-r)*w}px)`;
+    requestAnimationFrame(physics);
+  })();
+
+  const shade = hex => { const n=parseInt(hex.slice(1),16), f=c=>Math.round(c*.82); return `rgb(${f(n>>16)},${f((n>>8)&255)},${f(n&255)})`; };
+  const sizeClass = n => n===1 ? "" : n===2 ? "n2" : n===3 ? "n3" : "many";
+
+  /* ================= 一個梯次：一次開出全部得獎者 ================= */
+  async function drawBatch(list, b){
+    const n=list.length, duration = fast ? FAST_MS : NORMAL_MS;
+    slotText.textContent = `第 ${b+1} 梯次` + (n>1 ? ` · 一次開出 ${n} 位` : "");
+    winnersBox.className = "winners " + sizeClass(n);
+    winnersBox.innerHTML = ""; winnersBox.scrollTop = 0;
+    const cards = list.map(() => {
+      const c=document.createElement("div"); c.className="card";
+      c.innerHTML='<div class="gball rolling"><span>?</span></div><div class="nm empty">．．．</div>';
+      winnersBox.appendChild(c);
+      return {ball:c.firstChild, num:c.firstChild.firstChild, name:c.lastChild};
+    });
+    congrats.textContent = "滾呀滾～轉呀轉～🔔";
+    dome.classList.add("spinning"); base.classList.add("spinning"); mixing=true;
+
+    const start=performance.now();
+    await new Promise(resolve=>{
+      const step=()=>{
+        const p=(performance.now()-start)/duration;
+        if(p>=1) return resolve();
+        cards.forEach(c => c.num.textContent = 1+Math.floor(Math.random()*ROLL_MAX));
+        sfxTick();
+        setTimeout(step, 55 + Math.pow(p,2.2)*260);
+      };
+      step();
+    });
+    mixing=false; dome.classList.remove("spinning"); base.classList.remove("spinning");
+
+    // 球號依序彈出
+    sfxDingDong();
+    const stagger = n>1 ? Math.min(380, 2400/n) : 0;
+    for(let i=0;i<n;i++){
+      const w=list[i], col=colorFor(w.no), c=cards[i];
+      c.num.textContent = w.no;
+      c.ball.className = "gball pop";
+      c.ball.style.background = `radial-gradient(circle at 35% 30%,#fff 0 12%,${col} 45%,${shade(col)})`;
+      if(i>0) sfxBell();
+      if(stagger) await sleep(stagger);
+    }
+    await sleep(500);
+    // 名字一起亮相
+    cards.forEach((c,i)=>{ c.name.textContent=list[i].name; c.name.className="nm show"; addRoster(list[i], b); });
+    congrats.textContent = n>1 ? `🎊 恭喜以上 ${n} 位得獎！🎊` : "🎊 恭喜得獎！🎊";
+    sfxCheer(); confetti();
+  }
+
+  async function runBatch(){
+    if(busy || batchIdx>=BATCHES.length) return;
+    busy=true; nextBtn.disabled=true;
+    const b=batchIdx;
+    batchPill.textContent = `🎁 第 ${b+1} 梯次開獎中（共 ${BATCHES.length} 梯次）`;
+    await drawBatch(BATCHES[b], b);
+    batchIdx++; busy=false;
+    if(batchIdx>=BATCHES.length){
+      batchPill.textContent = "🌟 全部梯次開獎完畢！";
+      nextBtn.classList.add("hidden");
+      await sleep(3000);
+      endModal.classList.add("show"); sfxCheer(); confetti(140);
+    }else{
+      batchPill.textContent = `✅ 第 ${b+1} 梯次完成！下一個是第 ${batchIdx+1} 梯次`;
+      nextBtn.disabled=false;
+    }
+  }
+
+  startBtn.addEventListener("click",()=>{
+    audio(); startBtn.classList.add("hidden"); nextBtn.classList.remove("hidden"); runBatch();
+  },{once:true});
+  nextBtn.addEventListener("click",()=>{ audio(); runBatch(); });
+  fastBtn.addEventListener("click",()=>{
+    fast=!fast;
+    fastBtn.classList.toggle("on",fast);
+    fastBtn.textContent = fast ? "⚡ 加速抽：開" : "⚡ 加速抽：關";
+    fastBtn.setAttribute("aria-pressed",fast);
+  });
+
+  /* ================= 得獎名冊（可捲動，適合上百筆） ================= */
+  function addRoster(w, b){
+    winners.push({...w, batch:b});
+    rosterEmpty.classList.add("hidden");
+    if(b!==lastGroup){
+      const h=document.createElement("li"); h.className="grp"; h.textContent=`🎄 第 ${b+1} 梯次`;
+      rosterList.appendChild(h); lastGroup=b;
+    }
+    const li=document.createElement("li");
+    li.innerHTML=`<div class="r-ball" style="background:${colorFor(w.no)}">${w.no}</div><div class="r-name"></div>`;
+    li.querySelector(".r-name").textContent=w.name;
+    rosterList.appendChild(li);
+    rosterList.scrollTop = rosterList.scrollHeight;
+    rosterCount.textContent = winners.length;
+    rosterSum.textContent = `目前共 ${winners.length} 位得獎`;
+  }
+  function setDrawer(open){
+    drawer.classList.toggle("open",open);
+    document.body.classList.toggle("drawer-open",open);
+    rosterBtn.setAttribute("aria-expanded",open);
+  }
+  rosterBtn.addEventListener("click",()=>setDrawer(!drawer.classList.contains("open")));
+  $("closeDrawer").addEventListener("click",()=>setDrawer(false));
+  $("modalClose").addEventListener("click",()=>endModal.classList.remove("show"));
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ setDrawer(false); endModal.classList.remove("show"); } });
+
+  /* ================= 彩帶 ================= */
+  function confetti(n=80){
+    const pal=["#ff7b7b","#5fd3a8","#ffd54f","#ffffff","#7fb8ff","#ffb7c9"];
+    for(let i=0;i<n;i++){
+      const p=document.createElement("div"); p.className="confetti";
+      const s=6+Math.random()*9;
+      p.style.cssText=`left:${Math.random()*100}vw;width:${s}px;height:${s*(Math.random()<.5?1:1.8)}px;
+        background:${pal[i%pal.length]};border-radius:${i%2?"50%":"3px"};box-shadow:0 0 0 1px rgba(90,70,54,.06);
+        animation-duration:${2.2+Math.random()*2}s;animation-delay:${Math.random()*.5}s;
+        --dx:${(Math.random()-.5)*200}px;--rot:${Math.random()*720}deg`;
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(),5000);
+    }
+  }
+})();
+</script>
+</body>
+</html>
