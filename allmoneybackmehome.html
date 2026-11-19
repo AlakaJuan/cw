@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 預設不提供搜尋引擎爬蟲索引 -->
+    <meta name="robots" content="noindex, nofollow">
+    <title>花悶粒米奈賺飽飽計算機 💰</title>
+    <!-- 引入 Google Fonts 思源黑體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 html2canvas 用於生成戰績圖片 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        gold: {
+                            50: '#FFFBEB',
+                            100: '#FEF3C7',
+                            200: '#FDE68A',
+                            300: '#FCD34D',
+                            400: '#FBBF24',
+                            500: '#F59E0B',
+                            600: '#D97706',
+                            700: '#B45309',
+                            800: '#92400E',
+                            900: '#78350F',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 50%, #FDE68A 100%);
+            min-height: 100vh;
+        }
+        .gold-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            border: 2px solid #FCD34D;
+            box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.15), 0 8px 10px -6px rgba(217, 119, 6, 0.1);
+        }
+        .coin-shine {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        /* 自訂日期選擇器樣式優化 */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(42%) sepia(93%) saturate(1352%) hue-rotate(15deg) brightness(95%) contrast(95%);
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="text-amber-950 antialiased selection:bg-amber-300 selection:text-amber-950 pb-16">
+
+    <!-- 頂部標題區 -->
+    <header class="pt-10 pb-6 px-4 text-center max-w-4xl mx-auto">
+        <div class="inline-block bg-amber-500 text-white text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full shadow-sm mb-3 tracking-wider">
+            ✨ 財富自由啟動器 • 每一天都在幫自己加薪 ✨
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-black text-amber-900 tracking-tight drop-shadow-sm">
+            花悶粒米奈賺飽飽計算機
+        </h1>
+        <p class="mt-3 text-amber-800/80 text-sm sm:text-base font-medium">
+            每週省下 <span class="font-bold text-amber-700">$500</span>，算算你重獲自由後已經賺了多少快樂基金！
+        </p>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 space-y-8">
+        
+        <!-- 日期選擇器區塊 -->
+        <section class="gold-card rounded-3xl p-6 sm:p-8 text-center transition-all">
+            <label for="leaveDate" class="block text-lg sm:text-xl font-bold text-amber-900 mb-2">
+                📅 請選擇你「獲得自由」的紀念日：
+            </label>
+            <p class="text-xs sm:text-sm text-amber-700 mb-5">
+                （可選擇 2018 年 1 月 1 日至今的任何一天）
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+                <input 
+                    type="date" 
+                    id="leaveDate" 
+                    min="2018-01-01"
+                    class="w-full px-5 py-3.5 text-lg font-bold text-amber-950 bg-amber-50 border-2 border-amber-400 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-300 focus:border-amber-500 transition-all shadow-inner text-center cursor-pointer"
+                >
+            </div>
+            <p id="dateErrorMsg" class="hidden mt-3 text-sm font-bold text-red-600">
+                ⚠️ 請選擇 2018-01-01 到今天之間的日期喔！
+            </p>
+        </section>
+
+        <!-- 初始空白引導狀態 -->
+        <section id="emptyState" class="text-center py-12 px-4">
+            <div class="text-6xl mb-4 animate-float">💰</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-amber-900 mb-2">
+                點擊上方月曆，揭曉你的賺飽飽戰績！
+            </h2>
+            <p class="text-amber-800/75 text-sm sm:text-base max-w-md mx-auto">
+                選好日期後，系統將自動為你計算到今天為止累積的財富與自由天數。
+            </p>
+        </section>
+
+        <!-- 計算結果主戰績區 (預設隱藏，選擇日期後展開) -->
+        <div id="resultContainer" class="hidden space-y-8">
+            
+            <!-- 戰績截圖目標區域 -->
+            <div id="captureArea" class="bg-gradient-to-br from-amber-100 via-yellow-50 to-amber-200 rounded-3xl p-6 sm:p-10 border-4 border-amber-400 shadow-2xl relative overflow-hidden">
+                <!-- 裝飾背景圓圈 -->
+                <div class="absolute -top-16 -right-16 w-48 h-48 bg-amber-300/30 rounded-full pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-56 h-56 bg-yellow-400/20 rounded-full pointer-events-none"></div>
+
+                <div class="relative z-10 text-center">
+                    <div class="inline-flex items-center gap-2 bg-amber-900/10 text-amber-900 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+                        <span>🗓️ 戰績結算日：<span id="todayDisplay"></span></span>
+                    </div>
+
+                    <!-- 離開週數與天數 -->
+                    <div class="mb-4">
+                        <span class="inline-block bg-white/90 border-2 border-amber-400 text-amber-900 text-lg sm:text-2xl font-black px-6 py-2 rounded-2xl shadow-sm">
+                            🎉 已經離開 <span id="weeksText" class="text-amber-600 text-2xl sm:text-3xl">0</span> 週又 <span id="daysText" class="text-amber-600 text-2xl sm:text-3xl">0</span> 天
+                        </span>
+                        <p class="text-xs sm:text-sm text-amber-800/80 mt-2 font-medium">
+                            （累計共 <span id="totalDaysText" class="font-bold">0</span> 個自由自在的日子）
+                        </p>
+                    </div>
+
+                    <!-- 巨幅總金額顯示 -->
+                    <div class="my-6 py-6 px-4 bg-white/95 rounded-2xl border-2 border-amber-300 shadow-inner">
+                        <p class="text-xl sm:text-2xl font-black text-amber-900 mb-2">
+                            太棒了！到今天已經賺了
+                        </p>
+                        <div class="flex items-baseline justify-center gap-2 text-amber-600">
+                            <span class="text-3xl sm:text-5xl font-black">NT$</span>
+                            <span id="moneyDisplay" class="text-5xl sm:text-7xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600">
+                                0
+                            </span>
+                            <span class="text-2xl sm:text-4xl font-black text-amber-900">元！</span>
+                        </div>
+                    </div>
+
+                    <!-- 幽默鼓勵語錄區 -->
+                    <div class="bg-amber-900 text-amber-50 rounded-2xl p-5 sm:p-6 shadow-lg max-w-2xl mx-auto">
+                        <p id="quoteText" class="text-lg sm:text-xl font-bold leading-relaxed mb-2">
+                            「不用繼續悲情真好！讓我們繼續賺下去～」
+                        </p>
+                        <p class="text-xs sm:text-sm text-amber-300 font-medium">
+                            🌟 每一分省下的錢，都變成你喜歡的樣子！
+                        </p>
+                    </div>
+
+                    <!-- 圖片浮水印標記 (匯出圖片時更有質感) -->
+                    <div class="mt-6 pt-3 border-t border-amber-300/60 flex justify-between items-center text-xs text-amber-800/70 font-bold">
+                        <span>花悶粒米奈賺飽飽計算機</span>
+                        <span>起始日：<span id="startDateDisplay"></span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 互動按鈕列 (不列入截圖內) -->
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <button 
+                    id="newQuoteBtn" 
+                    type="button"
+                    class="flex items-center gap-2 bg-white hover:bg-amber-50 text-amber-900 border-2 border-amber-400 font-bold px-6 py-3 rounded-2xl shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer"
+                >
+                    <span>🎲</span> 換一句鼓勵的話
+                </button>
+                <button 
+                    id="downloadBtn" 
+                    type="button"
+                    class="flex items-center gap-2 coin-shine hover:opacity-95 text-white font-bold px-7 py-3 rounded-2xl shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer"
+                >
+                    <span>📸</span> 下載戰績圖片
+                </button>
+            </div>
+
+            <!-- 購買力換算卡片網格 -->
+            <section class="pt-4">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl sm:text-3xl font-black text-amber-900">
+                        🛍️ 這些錢可以幫自己買多少快樂？
+                    </h2>
+                    <p class="text-sm text-amber-800/80 mt-1">
+                        把省下來的錢換成實質享受，看看你的購買力有多驚人！
+                    </p>
+                </div>
+
+                <div id="itemsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                    <!-- 卡片將由 JavaScript 動態渲染 -->
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // 1. 基礎設定與資料定義 (可依需求微調)
+        // ==========================================
+        const WEEKLY_RATE = 500;
+        const DAILY_RATE = WEEKLY_RATE / 7; // 71.4285714...
+
+        // 幽默勵志金句庫（混搭正向與解脫吐槽風格）
+        const QUOTES = [
+            "不用繼續悲情真好！讓我們繼續賺下去～",
+            "不用繼續狗血真好！把時間跟鈔票留給真正快樂的事，繼續賺下去～",
+            "不用繼續耳朵痛真好！耳根清淨、荷包滿滿，讓我們繼續賺下去～",
+            "離開是為了遇見更好的自己，而且荷包還變胖了！繼續賺下去～",
+            "不用再聽無止盡的畫大餅真好，現在你的錢包才是真的大餅！繼續賺下去～",
+            "自由的空氣特別香，省下來的每一塊錢都特別甜！讓我們繼續賺下去～",
+            "告別內耗的第一天就是賺錢的開始，恭喜你越來越富有！繼續賺下去～",
+            "不用在週末或下班後還要演戲真好，這筆錢拿去吃好料最實在！繼續賺下去～",
+            "你的時間很貴，不該浪費在消耗能量的人事物上。繼續快樂賺下去～",
+            "看看這筆戰績，當初的決定真是太英明了！讓我們繼續賺下去～"
+        ];
+
+        // 購買力換算清單 (包含指定品項與台灣日常生活有感小物)
+        const REWARD_ITEMS = [
+            { name: "大麥克漢堡", price: 70, unit: "個", icon: "🍔" },
+            { name: "一客香煎牛排", price: 300, unit: "客", icon: "🥩" },
+            { name: "看電影一場", price: 350, unit: "場", icon: "🎟️" },
+            { name: "買樂高一盒", price: 1500, unit: "盒", icon: "🧱" },
+            { name: "一雙帥氣運動鞋", price: 3000, unit: "雙", icon: "👟" },
+            { name: "讀一門學分", price: 3000, unit: "門", icon: "🎓" },
+            { name: "看一場演唱會", price: 4000, unit: "場", icon: "🎤" },
+            { name: "吃一頓米其林餐廳", price: 8000, unit: "頓", icon: "🍽️" },
+            { name: "一隻全新 iPhone", price: 30000, unit: "支", icon: "📱" },
+            { name: "去日本爽玩一趟", price: 40000, unit: "趟", icon: "✈️" },
+            { name: "超商大杯美式", price: 45, unit: "杯", icon: "☕" },
+            { name: "全糖去冰珍奶", price: 65, unit: "杯", icon: "🧋" },
+            { name: "邪惡國民大雞排", price: 90, unit: "塊", icon: "🍗" },
+            { name: "Netflix 追劇月費", price: 390, unit: "個月", icon: "🎬" }
+        ];
+
+        // ==========================================
+        // 2. DOM 元素綁定與日期初始化
+        // ==========================================
+        const leaveDateInput = document.getElementById('leaveDate');
+        const dateErrorMsg = document.getElementById('dateErrorMsg');
+        const emptyState = document.getElementById('emptyState');
+        const resultContainer = document.getElementById('resultContainer');
+        
+        const todayDisplay = document.getElementById('todayDisplay');
+        const startDateDisplay = document.getElementById('startDateDisplay');
+        const weeksText = document.getElementById('weeksText');
+        const daysText = document.getElementById('daysText');
+        const totalDaysText = document.getElementById('totalDaysText');
+        const moneyDisplay = document.getElementById('moneyDisplay');
+        const quoteText = document.getElementById('quoteText');
+        const itemsGrid = document.getElementById('itemsGrid');
+        
+        const newQuoteBtn = document.getElementById('newQuoteBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // 取得本地今日日期字串 (YYYY-MM-DD)，避免時區偏差
+        function getLocalTodayString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        const todayStr = getLocalTodayString();
+        leaveDateInput.setAttribute('max', todayStr);
+        todayDisplay.textContent = todayStr.replace(/-/g, '/');
+
+        let currentQuoteIndex = -1;
+        let animationFrameId = null;
+
+        // ==========================================
+        // 3. 核心功能函式
+        // ==========================================
+
+        // 隨機切換勵志金句（保證不與上一句重複）
+        function pickRandomQuote() {
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * QUOTES.length);
+            } while (nextIndex === currentQuoteIndex && QUOTES.length > 1);
+            currentQuoteIndex = nextIndex;
+            quoteText.textContent = `「${QUOTES[currentQuoteIndex]}」`;
+        }
+
+        // 數字動態跳動動畫 (Count-Up)
+        function animateNumber(targetValue) {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            const duration = 900; // 動畫時間 0.9 秒
+            const startTime = performance.now();
+            const startValue = 0;
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // Ease-out cubic 減速曲線
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const currentVal = Math.round(startValue + (targetValue - startValue) * easeProgress);
+                
+                moneyDisplay.textContent = currentVal.toLocaleString('zh-TW');
+
+                if (progress < 1) {
+                    animationFrameId = requestAnimationFrame(update);
+                } else {
+                    moneyDisplay.textContent = targetValue.toLocaleString('zh-TW');
+                }
+            }
+            animationFrameId = requestAnimationFrame(update);
+        }
+
+        // 渲染購買力卡片網格
+        function renderRewardItems(totalMoney) {
+            itemsGrid.innerHTML = '';
+
+            REWARD_ITEMS.forEach(item => {
+                const count = Math.floor(totalMoney / item.price);
+                const progressPercent = Math.min(100, Math.round((totalMoney / item.price) * 100));
+                const isAffordable = count >= 1;
+
+                const card = document.createElement('div');
+                card.className = `gold-card rounded-2xl p-5 flex flex-col justify-between transition-transform hover:-translate-y-1 ${
+                    isAffordable ? 'border-amber-400' : 'border-amber-200/80 opacity-95'
+                }`;
+
+                let statusHtml = '';
+                if (isAffordable) {
+                    statusHtml = `
+                        <div class="mt-3 pt-3 border-t border-amber-200 flex items-baseline justify-between">
+                            <span class="text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-lg">已達成目標</span>
+                            <div class="text-right">
+                                <span class="text-sm font-bold text-amber-900">可買 </span>
+                                <span class="text-2xl sm:text-3xl font-black text-amber-600">${count.toLocaleString('zh-TW')}</span>
+                                <span class="text-sm font-bold text-amber-900"> ${item.unit}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    statusHtml = `
+                        <div class="mt-3 pt-3 border-t border-amber-100">
+                            <div class="flex justify-between text-xs font-bold text-amber-800 mb-1.5">
+                                <span>累積進度加油中...</span>
+                                <span>${progressPercent}%</span>
+                            </div>
+                            <div class="w-full bg-amber-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-gradient-to-r from-amber-400 to-amber-500 h-2.5 rounded-full transition-all duration-700" style="width: ${progressPercent}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-2xl sm:text-3xl shrink-0 shadow-inner">
+                            ${item.icon}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-amber-950 text-base sm:text-lg leading-tight">${item.name}</h3>
+                            <p class="text-xs text-amber-700 font-medium mt-0.5">單價 NT$ ${item.price.toLocaleString('zh-TW')}</p>
+                        </div>
+                    </div>
+                    ${statusHtml}
+                `;
+
+                itemsGrid.appendChild(card);
+            });
+        }
+
+        // 執行計算並更新畫面
+        function calculateAndDisplay() {
+            const selectedVal = leaveDateInput.value;
+            if (!selectedVal) return;
+
+            // 解析本地日期避免 UTC 跨日誤差
+            const [sYear, sMonth, sDay] = selectedVal.split('-').map(Number);
+            const startDate = new Date(sYear, sMonth - 1, sDay);
+            
+            const [tYear, tMonth, tDay] = todayStr.split('-').map(Number);
+            const todayDate = new Date(tYear, tMonth - 1, tDay);
+
+            const minDate = new Date(2018, 0, 1);
+
+            // 驗證日期區間
+            if (startDate < minDate || startDate > todayDate) {
+                dateErrorMsg.classList.remove('hidden');
+                return;
+            }
+            dateErrorMsg.classList.add('hidden');
+
+            // 計算總天數
+            const diffTime = todayDate - startDate;
+            const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            const weeks = Math.floor(totalDays / 7);
+            const remainingDays = totalDays % 7;
+
+            // 總金額 = 總天數 * (500 / 7)，四捨五入至整數
+            const totalEarned = Math.round(totalDays * DAILY_RATE);
+
+            // 更新文字與切換顯示狀態
+            startDateDisplay.textContent = selectedVal.replace(/-/g, '/');
+            weeksText.textContent = weeks.toLocaleString('zh-TW');
+            daysText.textContent = remainingDays;
+            totalDaysText.textContent = totalDays.toLocaleString('zh-TW');
+
+            emptyState.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+
+            // 觸發金句、數字動畫與購買力卡片
+            pickRandomQuote();
+            animateNumber(totalEarned);
+            renderRewardItems(totalEarned);
+        }
+
+        // ==========================================
+        // 4. 事件監聽器
+        // ==========================================
+        // 讓日曆在未選擇狀態點擊開啟時，預設跳轉定位至 2022 年 1 月
+        let hasSelectedDate = false;
+        function setCalendarDefaultViewTo2022Jan() {
+            if (!hasSelectedDate && !leaveDateInput.value) {
+                leaveDateInput.value = '2022-01-01';
+                // 若使用者未實際變更日期就離開焦點，恢復為空白狀態
+                setTimeout(() => {
+                    if (!hasSelectedDate && document.activeElement !== leaveDateInput) {
+                        leaveDateInput.value = '';
+                    }
+                }, 150);
+            }
+        }
+        leaveDateInput.addEventListener('pointerdown', setCalendarDefaultViewTo2022Jan);
+        leaveDateInput.addEventListener('focus', setCalendarDefaultViewTo2022Jan);
+        leaveDateInput.addEventListener('blur', () => {
+            if (!hasSelectedDate) {
+                leaveDateInput.value = '';
+            }
+        });
+
+        leaveDateInput.addEventListener('change', () => {
+            if (leaveDateInput.value) {
+                hasSelectedDate = true;
+                calculateAndDisplay();
+            }
+        });
+
+        newQuoteBtn.addEventListener('click', () => {
+            pickRandomQuote();
+        });
+
+        // 一鍵下載戰績圖片
+        downloadBtn.addEventListener('click', async () => {
+            const captureElement = document.getElementById('captureArea');
+            const originalText = downloadBtn.innerHTML;
+            
+            try {
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<span>⏳</span> 圖片生成中...';
+
+                const canvas = await html2canvas(captureElement, {
+                    scale: 2, // 2倍解析度確保手機與電腦觀看都清晰
+                    backgroundColor: '#FEF3C7',
+                    useCORS: true
+                });
+
+                const imageURL = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = imageURL;
+                downloadLink.download = `花悶粒米奈賺飽飽戰績_${todayStr}.png`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            } catch (error) {
+                console.error('截圖生成失敗:', error);
+                alert('抱歉，圖片生成時發生一點小狀況，請再試一次！');
+            } finally {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = originalText;
+            }
+        });
+    </script>
+</body>
+</html>
