@@ -38,9 +38,18 @@
         }
     </script>
     <style>
+        /* 根元素底色：避免捲動到底或手機回彈時露出白底 */
+        html {
+            background-color: #FDE68A;
+            min-height: 100%;
+        }
+        /* 版面改為上下彈性排列：內容不足一頁時，Footer 自動貼齊底部，不留大片空白 */
         body {
             background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 50%, #FDE68A 100%);
             min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
         }
         .gold-card {
             background: rgba(255, 255, 255, 0.92);
@@ -66,7 +75,7 @@
         }
     </style>
 </head>
-<body class="text-amber-950 antialiased selection:bg-amber-300 selection:text-amber-950 pb-6">
+<body class="text-amber-950 antialiased selection:bg-amber-300 selection:text-amber-950">
 
     <!-- 頂部標題區 -->
     <header class="pt-10 pb-6 px-4 text-center max-w-4xl mx-auto">
@@ -81,7 +90,7 @@
         </p>
     </header>
 
-    <main class="max-w-4xl mx-auto px-4 space-y-8">
+    <main class="flex-1 w-full max-w-4xl mx-auto px-4 space-y-8">
         
         <!-- 日期選擇器區塊 -->
         <section class="gold-card rounded-3xl p-6 sm:p-8 text-center transition-all">
@@ -106,7 +115,7 @@
         </section>
 
         <!-- 初始空白引導狀態 -->
-        <section id="emptyState" class="text-center py-12 px-4">
+        <section id="emptyState" class="text-center py-8 px-4">
             <div class="text-6xl mb-4 animate-float">💰</div>
             <h2 class="text-xl sm:text-2xl font-bold text-amber-900 mb-2">
                 點擊上方月曆，揭曉你的賺飽飽戰績！
@@ -202,6 +211,13 @@
         </div>
     </main>
 
+    <!-- 頁尾 -->
+    <footer class="mt-10 border-t-2 border-amber-300/70 bg-amber-900/5">
+        <p class="max-w-4xl mx-auto px-4 py-5 text-center text-xs sm:text-sm font-medium text-amber-800/80">
+            Copyright © 2026 天天開心天天快樂服務團 All Rights Reserved.
+        </p>
+    </footer>
+
     <script>
         // ==========================================
         // 1. 基礎設定與資料定義 (可依需求微調)
@@ -233,22 +249,23 @@
             "恭喜脫離大型情緒勒索現場，身心靈與錢包同步獲得大解放！繼續賺下去～"
         ];
 
-        // 購買力換算清單 (包含指定品項與台灣日常生活有感小物)
+        // 購買力換算清單 (包含指定品項與台灣日常生活有感小物，依單價由低到高排列)
         const REWARD_ITEMS = [
+            { name: "超商大杯美式", price: 45, unit: "杯", icon: "☕" },
+            { name: "全糖去冰珍奶", price: 65, unit: "杯", icon: "🧋" },
             { name: "大麥克漢堡", price: 70, unit: "個", icon: "🍔" },
+            { name: "邪惡國民大雞排", price: 90, unit: "塊", icon: "🍗" },
             { name: "一客香煎牛排", price: 300, unit: "客", icon: "🥩" },
             { name: "看電影一場", price: 350, unit: "場", icon: "🎟️" },
+            { name: "Netflix 追劇月費", price: 390, unit: "個月", icon: "🎬" },
             { name: "買樂高一盒", price: 1500, unit: "盒", icon: "🧱" },
+            { name: "台積電股票一股", price: 2200, unit: "股", icon: "📈" },
             { name: "一雙帥氣運動鞋", price: 3000, unit: "雙", icon: "👟" },
             { name: "讀一門學分", price: 3000, unit: "門", icon: "🎓" },
             { name: "看一場演唱會", price: 4000, unit: "場", icon: "🎤" },
             { name: "吃一頓米其林餐廳", price: 8000, unit: "頓", icon: "🍽️" },
             { name: "一隻全新 iPhone", price: 30000, unit: "支", icon: "📱" },
-            { name: "去日本爽玩一趟", price: 40000, unit: "趟", icon: "✈️" },
-            { name: "超商大杯美式", price: 45, unit: "杯", icon: "☕" },
-            { name: "全糖去冰珍奶", price: 65, unit: "杯", icon: "🧋" },
-            { name: "邪惡國民大雞排", price: 90, unit: "塊", icon: "🍗" },
-            { name: "Netflix 追劇月費", price: 390, unit: "個月", icon: "🎬" }
+            { name: "去日本爽玩一趟", price: 40000, unit: "趟", icon: "✈️" }
         ];
 
         // ==========================================
