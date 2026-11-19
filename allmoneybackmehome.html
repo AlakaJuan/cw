@@ -12,8 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 html2canvas 用於生成戰績圖片 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -68,7 +66,7 @@
         }
     </style>
 </head>
-<body class="text-amber-950 antialiased selection:bg-amber-300 selection:text-amber-950 pb-16">
+<body class="text-amber-950 antialiased selection:bg-amber-300 selection:text-amber-950 pb-6">
 
     <!-- 頂部標題區 -->
     <header class="pt-10 pb-6 px-4 text-center max-w-4xl mx-auto">
@@ -94,12 +92,12 @@
                 （可選擇 2018 年 1 月 1 日至今的任何一天）
             </p>
             
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-[260px] sm:max-w-xs mx-auto">
                 <input 
                     type="date" 
                     id="leaveDate" 
                     min="2018-01-01"
-                    class="w-full px-5 py-3.5 text-lg font-bold text-amber-950 bg-amber-50 border-2 border-amber-400 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-300 focus:border-amber-500 transition-all shadow-inner text-center cursor-pointer"
+                    class="w-full px-4 py-3 text-base sm:text-lg font-bold text-amber-950 bg-amber-50 border-2 border-amber-400 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-300 focus:border-amber-500 transition-all shadow-inner text-center cursor-pointer"
                 >
             </div>
             <p id="dateErrorMsg" class="hidden mt-3 text-sm font-bold text-red-600">
@@ -143,16 +141,16 @@
                     </div>
 
                     <!-- 巨幅總金額顯示 -->
-                    <div class="my-6 py-6 px-4 bg-white/95 rounded-2xl border-2 border-amber-300 shadow-inner">
-                        <p class="text-xl sm:text-2xl font-black text-amber-900 mb-2">
+                    <div class="my-6 py-6 px-3 sm:px-4 bg-white/95 rounded-2xl border-2 border-amber-300 shadow-inner">
+                        <p class="text-lg sm:text-2xl font-black text-amber-900 mb-2">
                             太棒了！到今天已經賺了
                         </p>
-                        <div class="flex items-baseline justify-center gap-2 text-amber-600">
-                            <span class="text-3xl sm:text-5xl font-black">NT$</span>
-                            <span id="moneyDisplay" class="text-5xl sm:text-7xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600">
+                        <div class="flex items-baseline justify-center gap-1 sm:gap-2 text-amber-600 flex-wrap">
+                            <span class="text-xl sm:text-4xl font-black">NT$</span>
+                            <span id="moneyDisplay" class="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600">
                                 0
                             </span>
-                            <span class="text-2xl sm:text-4xl font-black text-amber-900">元！</span>
+                            <span class="text-lg sm:text-3xl font-black text-amber-900">元！</span>
                         </div>
                     </div>
 
@@ -181,14 +179,14 @@
                     type="button"
                     class="flex items-center gap-2 bg-white hover:bg-amber-50 text-amber-900 border-2 border-amber-400 font-bold px-6 py-3 rounded-2xl shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer"
                 >
-                    <span>🎲</span> 換一句鼓勵的話
-                </button>
+            <!-- 互動按鈕列 -->
+            <div class="flex flex-wrap items-center justify-center gap-4">
                 <button 
-                    id="downloadBtn" 
+                    id="newQuoteBtn" 
                     type="button"
-                    class="flex items-center gap-2 coin-shine hover:opacity-95 text-white font-bold px-7 py-3 rounded-2xl shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer"
+                    class="flex items-center gap-2 coin-shine hover:opacity-95 text-white font-bold px-7 py-3.5 rounded-2xl shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer"
                 >
-                    <span>📸</span> 下載戰績圖片
+                    <span>🎲</span> 換一句鼓勵的話
                 </button>
             </div>
 
@@ -229,7 +227,17 @@
             "告別內耗的第一天就是賺錢的開始，恭喜你越來越富有！繼續賺下去～",
             "不用在週末或下班後還要演戲真好，這筆錢拿去吃好料最實在！繼續賺下去～",
             "你的時間很貴，不該浪費在消耗能量的人事物上。繼續快樂賺下去～",
-            "看看這筆戰績，當初的決定真是太英明了！讓我們繼續賺下去～"
+            "看看這筆戰績，當初的決定真是太英明了！讓我們繼續賺下去～",
+            "不用處理假帳號真好！真實的人生和真實的存款才最靠譜，繼續賺下去～",
+            "不用當什麼小天使更輕鬆！照顧好自己就是最棒的天使，繼續賺下去～",
+            "不用天天盯著群組訊息焦慮真好，現在只盯著銀行餘額微笑！繼續賺下去～",
+            "不用再湊熱鬧當分母真好，每一分錢都實實在在留在自己口袋！繼續賺下去～",
+            "不用半夜還在回莫名其妙的訊息真好，睡飽飽又賺飽飽！繼續賺下去～",
+            "不用再幫別人的夢想買單真好，你的夢想由你自己來實現！繼續賺下去～",
+            "卸下無謂的頭銜與責任真好，無官一身輕、荷包重千斤！繼續賺下去～",
+            "不用再看人臉色陪笑真好，現在每天照鏡子都覺得自己容光煥發！繼續賺下去～",
+            "把浪費在無效社交的力氣省下來，吃頓大餐犒賞自己最實在！繼續賺下去～",
+            "恭喜脫離大型情緒勒索現場，身心靈與錢包同步獲得大解放！繼續賺下去～"
         ];
 
         // 購買力換算清單 (包含指定品項與台灣日常生活有感小物)
@@ -268,7 +276,6 @@
         const itemsGrid = document.getElementById('itemsGrid');
         
         const newQuoteBtn = document.getElementById('newQuoteBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
 
         // 取得本地今日日期字串 (YYYY-MM-DD)，避免時區偏差
         function getLocalTodayString() {
@@ -463,37 +470,6 @@
 
         newQuoteBtn.addEventListener('click', () => {
             pickRandomQuote();
-        });
-
-        // 一鍵下載戰績圖片
-        downloadBtn.addEventListener('click', async () => {
-            const captureElement = document.getElementById('captureArea');
-            const originalText = downloadBtn.innerHTML;
-            
-            try {
-                downloadBtn.disabled = true;
-                downloadBtn.innerHTML = '<span>⏳</span> 圖片生成中...';
-
-                const canvas = await html2canvas(captureElement, {
-                    scale: 2, // 2倍解析度確保手機與電腦觀看都清晰
-                    backgroundColor: '#FEF3C7',
-                    useCORS: true
-                });
-
-                const imageURL = canvas.toDataURL('image/png');
-                const downloadLink = document.createElement('a');
-                downloadLink.href = imageURL;
-                downloadLink.download = `花悶粒米奈賺飽飽戰績_${todayStr}.png`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            } catch (error) {
-                console.error('截圖生成失敗:', error);
-                alert('抱歉，圖片生成時發生一點小狀況，請再試一次！');
-            } finally {
-                downloadBtn.disabled = false;
-                downloadBtn.innerHTML = originalText;
-            }
         });
     </script>
 </body>
